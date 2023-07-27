@@ -1,0 +1,360 @@
+@charset "UTF-8";
+
+@-webkit-keyframes button-pulse-full {
+  0% {
+    -webkit-transform: scale(0.6);
+    transform: scale(0.6);
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    -webkit-transform: scale(1.5);
+    transform: scale(1.5);
+    opacity: 0;
+  }
+}
+@keyframes button-pulse-full {
+  0% {
+    -webkit-transform: scale(0.6);
+    transform: scale(0.6);
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    -webkit-transform: scale(1.5);
+    transform: scale(1.5);
+    opacity: 0;
+  }
+}
+@-webkit-keyframes button-phone {
+  0% {
+    -webkit-transform: rotateZ(0);
+    transform: rotateZ(0);
+  }
+  2% {
+    -webkit-transform: rotateZ(6deg);
+    transform: rotateZ(6deg);
+  }
+  4% {
+    -webkit-transform: rotateZ(-6deg);
+    transform: rotateZ(-6deg);
+  }
+  6% {
+    -webkit-transform: rotateZ(6deg);
+    transform: rotateZ(6deg);
+  }
+  8% {
+    -webkit-transform: rotateZ(-6deg);
+    transform: rotateZ(-6deg);
+  }
+  10% {
+    -webkit-transform: rotateZ(6deg);
+    transform: rotateZ(6deg);
+  }
+  12% {
+    -webkit-transform: rotateZ(-6deg);
+    transform: rotateZ(-6deg);
+  }
+  14% {
+    -webkit-transform: rotateZ(6deg);
+    transform: rotateZ(6deg);
+  }
+  16% {
+    -webkit-transform: rotateZ(-6deg);
+    transform: rotateZ(-6deg);
+  }
+  18% {
+    -webkit-transform: rotateZ(6deg);
+    transform: rotateZ(6deg);
+  }
+  20% {
+    -webkit-transform: rotateZ(-6deg);
+    transform: rotateZ(-6deg);
+  }
+  22% {
+    -webkit-transform: rotateZ(6deg);
+    transform: rotateZ(6deg);
+  }
+  24% {
+    -webkit-transform: rotateZ(-6deg);
+    transform: rotateZ(-6deg);
+  }
+  26% {
+    -webkit-transform: rotateZ(6deg);
+    transform: rotateZ(6deg);
+  }
+  28% {
+    -webkit-transform: rotateZ(-6deg);
+    transform: rotateZ(-6deg);
+  }
+  30% {
+    -webkit-transform: rotateZ(6deg);
+    transform: rotateZ(6deg);
+  }
+  32% {
+    -webkit-transform: rotateZ(-6deg);
+    transform: rotateZ(-6deg);
+  }
+  34% {
+    -webkit-transform: rotateZ(6deg);
+    transform: rotateZ(6deg);
+  }
+  36% {
+    -webkit-transform: rotateZ(-6deg);
+    transform: rotateZ(-6deg);
+  }
+  38% {
+    -webkit-transform: rotateZ(6deg);
+    transform: rotateZ(6deg);
+  }
+  40% {
+    -webkit-transform: rotateZ(-6deg);
+    transform: rotateZ(-6deg);
+  }
+  42% {
+    -webkit-transform: rotateZ(6deg);
+    transform: rotateZ(6deg);
+  }
+  44% {
+    -webkit-transform: rotateZ(-6deg);
+    transform: rotateZ(-6deg);
+  }
+  46% {
+    -webkit-transform: rotateZ(6deg);
+    transform: rotateZ(6deg);
+  }
+}
+@keyframes button-phone {
+  0% {
+    -webkit-transform: rotateZ(0);
+    transform: rotateZ(0);
+  }
+  2% {
+    -webkit-transform: rotateZ(6deg);
+    transform: rotateZ(6deg);
+  }
+  4% {
+    -webkit-transform: rotateZ(-6deg);
+    transform: rotateZ(-6deg);
+  }
+  6% {
+    -webkit-transform: rotateZ(6deg);
+    transform: rotateZ(6deg);
+  }
+  8% {
+    -webkit-transform: rotateZ(-6deg);
+    transform: rotateZ(-6deg);
+  }
+  10% {
+    -webkit-transform: rotateZ(6deg);
+    transform: rotateZ(6deg);
+  }
+  12% {
+    -webkit-transform: rotateZ(-6deg);
+    transform: rotateZ(-6deg);
+  }
+  14% {
+    -webkit-transform: rotateZ(6deg);
+    transform: rotateZ(6deg);
+  }
+  16% {
+    -webkit-transform: rotateZ(-6deg);
+    transform: rotateZ(-6deg);
+  }
+  18% {
+    -webkit-transform: rotateZ(6deg);
+    transform: rotateZ(6deg);
+  }
+  20% {
+    -webkit-transform: rotateZ(-6deg);
+    transform: rotateZ(-6deg);
+  }
+  22% {
+    -webkit-transform: rotateZ(6deg);
+    transform: rotateZ(6deg);
+  }
+  24% {
+    -webkit-transform: rotateZ(-6deg);
+    transform: rotateZ(-6deg);
+  }
+  26% {
+    -webkit-transform: rotateZ(6deg);
+    transform: rotateZ(6deg);
+  }
+  28% {
+    -webkit-transform: rotateZ(-6deg);
+    transform: rotateZ(-6deg);
+  }
+  30% {
+    -webkit-transform: rotateZ(6deg);
+    transform: rotateZ(6deg);
+  }
+  32% {
+    -webkit-transform: rotateZ(-6deg);
+    transform: rotateZ(-6deg);
+  }
+  34% {
+    -webkit-transform: rotateZ(6deg);
+    transform: rotateZ(6deg);
+  }
+  36% {
+    -webkit-transform: rotateZ(-6deg);
+    transform: rotateZ(-6deg);
+  }
+  38% {
+    -webkit-transform: rotateZ(6deg);
+    transform: rotateZ(6deg);
+  }
+  40% {
+    -webkit-transform: rotateZ(-6deg);
+    transform: rotateZ(-6deg);
+  }
+  42% {
+    -webkit-transform: rotateZ(6deg);
+    transform: rotateZ(6deg);
+  }
+  44% {
+    -webkit-transform: rotateZ(-6deg);
+    transform: rotateZ(-6deg);
+  }
+  46% {
+    -webkit-transform: rotateZ(6deg);
+    transform: rotateZ(6deg);
+  }
+}
+
+html,
+body {
+  height: 100%;
+  background-color: beige;
+}
+
+.c2c-modal {
+  position: fixed;
+  background-color: rgba(255, 255, 255, 0.25);
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 999;
+  visibility: hidden;
+  opacity: 0.5;
+  pointer-events: none;
+  transition: opacity 1s;
+  width: 350px;
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  padding: 2em;
+  background: white;
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+.c2c-modal.modal--open {
+  visibility: visible;
+  opacity: 1;
+  pointer-events: auto;
+  top: 50%;
+}
+.c2c-modal button:not(.close-modal) {
+  border: 0;
+  border-radius: 10px;
+  width: 100%;
+  font-size: 1.25rem;
+  padding: 0.5em 0;
+  font-weight: bold;
+}
+.c2c-modal button.close-modal {
+  border: 0;
+  background: none;
+  font-size: 1.5rem;
+  position: absolute;
+  top: 10px;
+  right: 10px;
+}
+.widget {
+  position: fixed;
+  bottom: 10px;
+  right: 10px;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 1s;
+  cursor: pointer;
+}
+.open {
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+.phone--widget .phone-button {
+  width: 50px;
+  height: 50px;
+  border-radius: 100%;
+  background-color: red;
+  color: white;
+  border: none;
+}
+.phone--widget button.animate-button span {
+  animation-name: button-phone;
+  animation-timing-function: linear;
+  animation-duration: inherit;
+  animation-delay: -0.5s;
+}
+.phone--widget button span {
+  transform: rotateZ(0);
+  display: block;
+}
+.phone--widget .phone-button span svg {
+  max-width: 70%;
+}
+.phone--widget .phone-button::after,
+.phone--widget .phone-button::before {
+  content: "";
+  position: absolute;
+  width: 50px;
+  height: 50px;
+  border-radius: 100%;
+  border-width: 2px;
+  border-color: inherit;
+  border-style: solid;
+  top: -2px;
+  left: -2px;
+  opacity: 0;
+}
+.phone--widget .phone-button.animate-button::after {
+  animation-name: button-pulse-full;
+  animation-timing-function: linear;
+  animation-delay: 0.5s;
+  animation-duration: inherit;
+}
+.phone--widget .phone-button.animate-button::before {
+  animation-name: button-pulse-full;
+  animation-timing-function: linear;
+  animation-duration: inherit;
+}
+.widget .tooltip {
+  width: 200px;
+  border-radius: 10px;
+  background: white;
+  padding: 0.5em;
+  position: absolute;
+  top: -215px;
+  left: -170px;
+  visibility: hidden;
+  opacity: 0;
+  transition: opacity 1s;
+}
+.widget .tooltip button {
+  border-radius: 50px;
+  background: rgba(190, 69, 69, 0.6);
+  border: none;
+  width: 75%;
+  margin: auto;
+  display: block;
+}
