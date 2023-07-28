@@ -1,7 +1,6 @@
 "use strict";
 
 const clickToCall = {
-  interval: 0,
   config: null,
   modal: {
     target: null,
@@ -60,40 +59,33 @@ const clickToCall = {
       initPhoneWidget() {
         const phoneWidget = clickToCall.phoneWidget.target;
         const themeColor = clickToCall.config?.themeColor;
-        if (!clickToCall.phoneWidget.target || !phoneWidget) {
-          clickToCall.errors.errorType = "nullPhoneWidget";
-          clickToCall.errors.showError();
-        } else if (!clickToCall.phoneWidget.tooltip) {
-          clickToCall.errors.errorType = "nullPhoneWidgetTooltip";
-          clickToCall.errors.showError();
+        const phoneWidgetButton = phoneWidget.querySelector("button");
+        const phoneWidgetIcons = phoneWidgetButton.querySelectorAll(".icon");
+        //found that the phone animation is best at double the duration of the pulse
+        phoneWidgetIcons.forEach((icon) => {
+          icon.style.animationDuration = `${
+            clickToCall.config.widgetCssAnimationTiming * 2
+          }s`;
+        });
+        if (themeColor) {
+          //set theme color to buttons
+          phoneWidgetButton.style.backgroundColor = `${themeColor}`;
+          phoneWidgetButton.style.borderColor = `${themeColor}`;
+          clickToCall.phoneWidget.tooltip.querySelector(
+            "button"
+          ).style.backgroundColor = `${themeColor}`;
         } else {
-          const phoneWidget = clickToCall.phoneWidget.target;
-          const phoneWidgetButton = phoneWidget.querySelector("button");
-          const phoneWidgetIcons = phoneWidgetButton.querySelectorAll(".icon");
-          //found that the phone animation is best at double the duration of the pulse
-          phoneWidgetIcons.forEach((icon) => {
-            icon.style.animationDuration = `${
-              clickToCall.config.cssAnimationTiming * 2
-            }s`;
-          });
-          if (themeColor) {
-            //set theme color to buttons
-            phoneWidgetButton.style.backgroundColor = `${themeColor}`;
-            phoneWidgetButton.style.borderColor = `${themeColor}`;
-            clickToCall.phoneWidget.tooltip.querySelector(
-              "button"
-            ).style.backgroundColor = `${themeColor}`;
-          }
-          phoneWidget.classList.add("open");
-          this.beginWidgetAnimationInterval(phoneWidget);
-          phoneWidget
-            .querySelector("button")
-            .addEventListener("click", function (e) {
-              //"this is bound to click event target"
-              //need to actually reference c2c object
-              clickToCall.phoneWidget.methods.openPhoneWidget();
-            });
+          phoneWidgetButton.style.borderColor = `red`;
         }
+        phoneWidget.classList.add("open");
+        this.beginWidgetAnimationInterval(phoneWidget);
+        phoneWidget
+          .querySelector("button")
+          .addEventListener("click", function (e) {
+            //"this is bound to click event target"
+            //need to actually reference c2c object
+            clickToCall.phoneWidget.methods.openPhoneWidget();
+          });
       },
       openPhoneWidget(clicked) {
         const widgetTooltip = clickToCall.phoneWidget.tooltip;
@@ -120,13 +112,13 @@ const clickToCall = {
         //any further animations
         return new Promise((resolve) => {
           const button = clickToCall.phoneWidget.target.querySelector("button");
-          button.style.animationDuration = `${clickToCall.config.cssAnimationTiming}s`;
+          button.style.animationDuration = `${clickToCall.config.widgetCssAnimationTiming}s`;
           button.classList.add("animate-button");
           //remove the class so we can animate again
           //convert css timing length to ms, then add a few hundred ms to it to make it smoothe
           clickToCall.phoneWidget.timeoutID = setTimeout(() => {
             resolve(true);
-          }, clickToCall.config.cssAnimationTiming * 1000 + 250);
+          }, clickToCall.config.widgetCssAnimationTiming * 1000 + 250);
         });
       },
       removeAnimation() {
@@ -143,12 +135,12 @@ const clickToCall = {
       },
       beginWidgetAnimationInterval() {
         //check if animationInterval is passed in config, else default
-        const animationIntervalTiming =
-          clickToCall.config?.animationIntervalTiming || 6000;
+        const widgetAnimationIntervalTiming =
+          clickToCall.config?.widgetAnimationIntervalTiming || 6000;
         this.animationRunning = setInterval(function () {
           //"this" gets set to window inside setInterval
           clickToCall.phoneWidget.methods.animationHandler();
-        }, animationIntervalTiming);
+        }, widgetAnimationIntervalTiming);
       },
       stopWidgetAnimationInterval(interval) {
         //clear out interval to stop the animation
@@ -161,17 +153,25 @@ const clickToCall = {
     errorType: null,
     errorMsgs: {
       nullModal:
-        "Target modal HTML element is null, please check that the HTML modal id in your config object is correct.\n\n Can't initilize modal.",
+        "Target modal HTML element can't be found, please check that the modal id in your config object is correct.\n\n Can't initilize modal.",
       nullPhoneWidget:
-        "Target phone widget HTML element is null, please check that the HTML phone widget id in your config object is correct.\n\n Can't initilize phone widget.",
+        "Target phone widget HTML element can't be found, please check that the phone widget id in your config object is correct.\n\n Can't initilize phone widget.",
       nullPhoneWidgetTooltip:
-        "Target phone widget tooltip HTML element is null, please check that the HTML phone widget tooltip id in your config object is correct.\n\n Can't initilize phone widget tooltip.",
+        "Target phone widget tooltip HTML element can't be found, please check that the phone widget tooltip id in your config object is correct.\n\n Can't initilize phone widget tooltip.",
       invalidConfig: `Invalid configuration object, please pass an object to clickToCall.init() with the follwing keys and valid HTML element id's as the values. See example object below \n
       const exampleConfig = {
           modalTarget: 'phone-modal',
           phoneWidgetTarget: 'phone-widget',
-          tooltipId: 'widget-tooltip',
-      }\n\n`,
+          tooltipId: 'widget-tooltip',\n
+          //Optional values:
+          //control the length between widget animations 
+          widgetAnimationIntervalTiming: 5,
+          //control the amount of time the widget animation takes
+          widgetCssAnimationTiming: 1.5,
+          //control the overall theme color of widget and modal buttons
+          themeColor: 'rgb(35, 151, 56)'
+      }\n
+          `,
     },
     showError() {
       console.error(
@@ -179,35 +179,65 @@ const clickToCall = {
       );
     },
   },
-  init(config) {
+  checkConfigValidity(userConfig) {
+    //each of these will short-circuit to null if document.querySelector fails
+    const modalExists = document.querySelector(
+      `#${userConfig?.modalTarget || null}`
+    );
+    const widgetExists = document.querySelector(
+      `#${userConfig?.phoneWidgetTarget || null}`
+    );
+    const tooltipExists = document.querySelector(
+      `#${userConfig?.tooltipId || null}`
+    );
+    //if our user provided config is null, or invalid
     if (
-      !config ||
-      !config.hasOwnProperty("modalTarget") ||
-      !config.hasOwnProperty("phoneWidgetTarget") ||
-      !config.hasOwnProperty("tooltipId") ||
-      !document.querySelector(`#${config.modalTarget}`) ||
-      !document.querySelector(`#${config.phoneWidgetTarget}`) ||
-      !document.querySelector(`#${config.tooltipId}`)
+      !userConfig ||
+      !userConfig.hasOwnProperty("modalTarget") ||
+      !userConfig.hasOwnProperty("phoneWidgetTarget") ||
+      !userConfig.hasOwnProperty("tooltipId")
     ) {
       this.errors.errorType = "invalidConfig";
       this.errors.showError();
+      return false;
+    }
+    //is any of our mandatory HTML elements are not present in the DOM
+    else if (!modalExists) {
+      this.errors.errorType = "nullModal";
+      this.errors.showError();
+      return false;
+    } else if (!widgetExists) {
+      this.errors.errorType = "nullPhoneWidget";
+      this.errors.showError();
+      return false;
+    } else if (!tooltipExists) {
+      this.errors.errorType = "nullPhoneWidgetTooltip";
+      this.errors.showError();
+      return false;
     } else {
+      return true;
+    }
+  },
+  init(config) {
+    //only initialize if we don't have config errors
+    if (this.checkConfigValidity(config)) {
       this.modal.target = document.querySelector(`#${config.modalTarget}`);
       this.phoneWidget.target = document.querySelector(
         `#${config.phoneWidgetTarget}`
       );
       this.phoneWidget.tooltip = document.querySelector(`#${config.tooltipId}`);
       //optinal values
-      config.animationIntervalTiming =
-        config?.animationIntervalTiming * 1000 || 6000;
-      config.cssAnimationTiming = config?.cssAnimationTiming || 1.5;
+      config.widgetAnimationIntervalTiming =
+        config?.widgetAnimationIntervalTiming * 1000 || 6000;
+      config.widgetCssAnimationTiming = config?.widgetCssAnimationTiming || 1.5;
       config.themeColor = config?.themeColor;
       //expose config
       this.config = config;
       //initialize
       this.modal.methods.initModal();
       console.log(`Click to Call JS initialized.`);
-      console.log(this);
+    } else {
+      console.log(`Click to Call JS initialization failed.`);
     }
   },
 };
