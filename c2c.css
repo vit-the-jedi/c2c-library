@@ -240,17 +240,12 @@ body {
   position: fixed;
   background-color: rgba(255, 255, 255, 0.25);
   top: 0;
-  right: 0;
-  bottom: 0;
-  left: 0;
   z-index: 999;
   visibility: hidden;
   opacity: 0.5;
   pointer-events: none;
   transition: opacity 1s;
   width: 350px;
-  position: absolute;
-  top: 100%;
   left: 50%;
   transform: translate(-50%, -50%);
   padding: 2em;
@@ -290,6 +285,7 @@ body {
   visibility: hidden;
   transition: opacity 1s;
   cursor: pointer;
+  z-index: 999;
 }
 .open {
   visibility: visible !important;
@@ -326,8 +322,8 @@ body {
   border-width: 2px;
   border-color: inherit;
   border-style: solid;
-  top: -2px;
-  left: -2px;
+  top: 0px;
+  left: 0px;
   opacity: 0;
 }
 .phone--widget .phone-button.animate-button::after {
