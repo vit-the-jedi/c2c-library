@@ -34,21 +34,33 @@ const clickToCall = {
                 "#click-to-call"
               ).style.backgroundColor = `${clickToCall.config.themeColor}`;
             }
-            setTimeout(() => {
-              modal.classList.add("modal--open");
-            }, 1000);
+
+            //create text
+            clickToCall.createText("modal");
+
+            const modalButton = modal.querySelector("#click-to-call");
+            modalButton.appendChild(clickToCall.createPhoneLink());
+
+            modalButton.addEventListener("click", function (ev) {
+              try {
+                ev.target.querySelector("a").click();
+              } catch (err) {
+                //avoiding thrown error, even though the code works
+              }
+            });
+
+            modal.classList.add("modal--open");
             document.body.appendChild(modalBg)
-            modal
-              .querySelectorAll(".close-modal")
-              .forEach((btn, arr, i, modal) => {
-                btn.addEventListener("click", function (e) {
-                  //"this" gets bound to click event target
-                  //need to actually reference c2c object
-                  clickToCall.modal.methods.closeModal(
-                    e.target.closest(".modal")
-                  );
-                });
+            modal.querySelectorAll(".close-modal").forEach((btn, arr, i, modal) => {
+              btn.addEventListener("click", function (e) {
+                //"this" gets bound to click event target
+                //need to actually reference c2c object
+                clickToCall.modal.methods.closeModal(
+                  e.target.closest(".modal")
+                );
               });
+            });
+
           } else {
             clickToCall.phoneWidget.methods.initPhoneWidget();
           }
@@ -66,12 +78,17 @@ const clickToCall = {
         const themeColor = clickToCall.config?.themeColor;
         const phoneWidgetButton = phoneWidget.querySelector("button");
         const phoneWidgetIcons = phoneWidgetButton.querySelectorAll(".icon");
+        const phoneWidgetTooltipButton = document.querySelector("#widget-tooltip").querySelector("button");
+        //add phone number and anchor tag
+        phoneWidgetTooltipButton.appendChild(clickToCall.createPhoneLink());
         //found that the phone animation is best at double the duration of the pulse
         phoneWidgetIcons.forEach((icon) => {
-          icon.style.animationDuration = `${
-            clickToCall.config.widgetCssAnimationTiming * 2
-          }s`;
+          icon.style.animationDuration = `${clickToCall.config.widgetCssAnimationTiming * 2
+            }s`;
         });
+        //create text
+        clickToCall.createText("phoneWidget");
+
         if (themeColor) {
           //set theme color to buttons
           phoneWidgetButton.style.backgroundColor = `${themeColor}`;
@@ -82,6 +99,8 @@ const clickToCall = {
         } else {
           phoneWidgetButton.style.borderColor = `red`;
         }
+
+
         phoneWidget.classList.add("open");
         this.beginWidgetAnimationInterval(phoneWidget);
         phoneWidget
@@ -184,6 +203,33 @@ const clickToCall = {
       );
     },
   },
+  createText(type) {
+    let target;
+    let headingType;
+    if (type === "modal") {
+      target = this.modal.target;
+      headingType = "h1"
+    } else {
+      target = this.phoneWidget.tooltip;
+      headingType = "h5"
+    }
+
+    const heading = document.createElement(headingType);
+    heading.textContent = clickToCall.config[type].heading;
+    const body = document.createElement("p");
+    body.textContent = clickToCall.config[type].body;
+
+    target.prepend(body);
+    target.prepend(heading);
+  },
+  createPhoneLink() {
+    const phoneLink = document.createElement("a");
+    phoneLink.href = `tel:+1${this.config.phoneNumber}`;
+    phoneLink.setAttribute("data-c2c-link", "")
+    phoneLink.setAttribute("style", "display:block;width:100%;height:100%;text-decoration:none;color:inherit;")
+    phoneLink.textContent = this.config.phoneNumber.replace(/^\+[0-9]/, '');
+    return phoneLink;
+  },
   checkConfigValidity(userConfig) {
     //each of these will short-circuit to null if document.querySelector fails
     const modalExists = document.querySelector(
@@ -223,7 +269,7 @@ const clickToCall = {
       return true;
     }
   },
-  init(config) {
+  async init(config) {
     //only initialize if we don't have config errors
     if (this.checkConfigValidity(config)) {
       this.modal.target = document.querySelector(`#${config.modalTarget}`);
@@ -236,15 +282,37 @@ const clickToCall = {
         config?.widgetAnimationIntervalTiming * 1000 || 6000;
       config.widgetCssAnimationTiming = config?.widgetCssAnimationTiming || 1.5;
       config.themeColor = config?.themeColor;
-      //expose config
-      this.config = config;
-      //initialize
-      this.modal.methods.initModal();
-      console.log(`Click to Call JS initialized.`);
+
+      //if we don't have a user provided phone number, go get one 
+      if (!config?.phoneNumber) {
+        //conditional API call
+        const getPhoneNumber = fetch("https://catfact.ninja/fact").then((resp) => {
+          return resp.json();
+        });
+
+        getPhoneNumber.then((data) => {
+          config.phoneNumber = data;
+          console.log(data);
+          //expose config
+          this.config = config;
+          //initialize
+          this.modal.methods.initModal();
+          console.log(`Click to Call JS initialized.`);
+        });
+
+      } else {
+        //expose config
+        this.config = config;
+        //initialize
+        this.modal.methods.initModal();
+        console.log(`Click to Call JS initialized.`);
+      }
+
     } else {
       console.log(`Click to Call JS initialization failed.`);
     }
   },
 };
+
 
 window.clickToCall = clickToCall || {};
