@@ -3,10 +3,19 @@
 const clickToCall = {
   config: null,
   modal: {
-    target: null,
+    template: [
+      {
+        container: `<div id="phone-modal" class="c2c-modal phone--modal modal--open">
+        <button role="button" class="close-modal">&times;</button>`,
+        heading: `<h1>!!heading!!</h1>`,
+        body: `<p>!!body!!</p>`,
+        button: `<button role="button" style="background-color:!!themeColor!!;" id="click-to-call"><a href="tel:+1!!phoneNumber!!">CALL NOW</a></button>`,
+        endTag: `</div>`
+      },
+    ],
     methods: {
-      closeModal() {
-        clickToCall.modal.target.classList.remove("modal--open");
+      closeModal(evTarget) {
+        evTarget.classList.remove("modal--open");
         document.body.removeChild(clickToCall.modal.modalBg);
         this.saveModalClosedState();
         clickToCall.phoneWidget.methods.initPhoneWidget();
@@ -19,58 +28,57 @@ const clickToCall = {
       saveModalClosedState() {
         sessionStorage.setItem("c2c-modal-closed", true);
       },
+      buildTemplate(index) {
+        const template = clickToCall.modal.template[index];
+        //create html 
+        let strHtml = "";
+        for (const objProp of Object.keys(template)) {
+          clickToCall.processTemplateString(objProp, template);
+          strHtml += template[objProp]
+        }
+        clickToCall.modal.template.processedTemplate = strHtml;
+      },
       initModal() {
-        const modal = clickToCall.modal.target;
-        if (!clickToCall.modal.target || !modal) {
-          clickToCall.errors.errorType = "nullModal";
-          clickToCall.errors.showError();
+        const modalBg = document.createElement("div");
+        modalBg.setAttribute("style", "background:rgba(0,0,0,0.5);position:fixed;height:100%;width:100%; z-index:998");
+        clickToCall.modal.modalBg = modalBg;
+        if (!this.getModalClosedState()) {
+          document.body.appendChild(modalBg);
+
+          //accepts template index
+          //builds the modal HTML
+          this.buildTemplate(0);
+
+          const modal = document.createElement("div")
+          modal.innerHTML = clickToCall.modal.template.processedTemplate;
+          document.body.appendChild(modal);
+          modal.querySelectorAll(".close-modal").forEach((btn, arr, i, modal) => {
+            btn.addEventListener("click", function (e) {
+              //"this" gets bound to click event target
+              //need to actually reference c2c object
+              clickToCall.modal.methods.closeModal(
+                e.target.closest(".c2c-modal")
+              );
+            });
+          });
+
         } else {
-          const modalBg = document.createElement("div");
-          modalBg.setAttribute("style", "background:rgba(0,0,0,0.5);position:fixed;height:100%;width:100%; z-index:998");
-          clickToCall.modal.modalBg = modalBg;
-          if (!this.getModalClosedState()) {
-            if (clickToCall.config.themeColor) {
-              modal.querySelector(
-                "#click-to-call"
-              ).style.backgroundColor = `${clickToCall.config.themeColor}`;
-            }
-
-            //create text
-            clickToCall.createText("modal");
-
-            const modalButton = modal.querySelector("#click-to-call");
-            modalButton.appendChild(clickToCall.createPhoneLink());
-
-            modalButton.addEventListener("click", function (ev) {
-              try {
-                ev.target.querySelector("a").click();
-              } catch (err) {
-                //avoiding thrown error, even though the code works
-              }
-            });
-
-            modal.classList.add("modal--open");
-            document.body.appendChild(modalBg)
-            modal.querySelectorAll(".close-modal").forEach((btn, arr, i, modal) => {
-              btn.addEventListener("click", function (e) {
-                //"this" gets bound to click event target
-                //need to actually reference c2c object
-                clickToCall.modal.methods.closeModal(
-                  e.target.closest(".modal")
-                );
-              });
-            });
-
-          } else {
-            clickToCall.phoneWidget.methods.initPhoneWidget();
-          }
+          clickToCall.phoneWidget.methods.initPhoneWidget();
         }
       },
     },
   },
   phoneWidget: {
-    target: null,
-    tooltip: null,
+    template: [
+      {
+        container: `<div id="phone-modal" class="c2c-modal phone--modal modal--open">
+        <button role="button" class="close-modal">&times;</button>`,
+        heading: `<h1>!!heading!!</h1>`,
+        body: `<p>!!body!!</p>`,
+        button: `<button role="button" style="background-color:!!themeColor!!;" id="click-to-call"><a href="tel:+1!!phoneNumber!!">CALL NOW</a></button>`,
+        endTag: `</div>`
+      },
+    ],
     timeoutID: null,
     methods: {
       initPhoneWidget() {
@@ -203,32 +211,16 @@ const clickToCall = {
       );
     },
   },
-  createText(type) {
-    let target;
-    let headingType;
-    if (type === "modal") {
-      target = this.modal.target;
-      headingType = "h1"
+  processTemplateString(prop, templateObj) {
+    //re-usable way to remove placceholders and add the values we want into the template
+    const placeholder = `!!${prop}!!`;
+
+    if (prop === "button") {
+      templateObj[prop] = templateObj[prop].replace("!!themeColor!!", clickToCall.config.themeColor);
+      templateObj[prop] = templateObj[prop].replace("!!phoneNumber!!", clickToCall.config.phoneNumber);
     } else {
-      target = this.phoneWidget.tooltip;
-      headingType = "h5"
+      templateObj[prop] = templateObj[prop].replace(placeholder, clickToCall.config.modal[prop]);
     }
-
-    const heading = document.createElement(headingType);
-    heading.textContent = clickToCall.config[type].heading;
-    const body = document.createElement("p");
-    body.textContent = clickToCall.config[type].body;
-
-    target.prepend(body);
-    target.prepend(heading);
-  },
-  createPhoneLink() {
-    const phoneLink = document.createElement("a");
-    phoneLink.href = `tel:+1${this.config.phoneNumber}`;
-    phoneLink.setAttribute("data-c2c-link", "")
-    phoneLink.setAttribute("style", "display:block;width:100%;height:100%;text-decoration:none;color:inherit;")
-    phoneLink.textContent = this.config.phoneNumber.replace(/^\+[0-9]/, '');
-    return phoneLink;
   },
   checkConfigValidity(userConfig) {
     //each of these will short-circuit to null if document.querySelector fails
