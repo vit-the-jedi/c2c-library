@@ -7,6 +7,7 @@ const clickToCall = {
     methods: {
       closeModal() {
         clickToCall.modal.target.classList.remove("modal--open");
+        document.body.removeChild(clickToCall.modal.modalBg);
         this.saveModalClosedState();
         clickToCall.phoneWidget.methods.initPhoneWidget();
       },
@@ -24,6 +25,9 @@ const clickToCall = {
           clickToCall.errors.errorType = "nullModal";
           clickToCall.errors.showError();
         } else {
+          const modalBg = document.createElement("div");
+          modalBg.setAttribute("style", "background:rgba(0,0,0,0.5);position:fixed;height:100%;width:100%; z-index:998");
+          clickToCall.modal.modalBg = modalBg;
           if (!this.getModalClosedState()) {
             if (clickToCall.config.themeColor) {
               modal.querySelector(
@@ -33,6 +37,7 @@ const clickToCall = {
             setTimeout(() => {
               modal.classList.add("modal--open");
             }, 1000);
+            document.body.appendChild(modalBg)
             modal
               .querySelectorAll(".close-modal")
               .forEach((btn, arr, i, modal) => {
