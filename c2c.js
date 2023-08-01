@@ -3,14 +3,15 @@
 const clickToCall = {
   config: null,
   modal: {
-    template: [
+    templates: [
       {
         container: `<div id="phone-modal" class="c2c-modal phone--modal modal--open">
-        <button role="button" class="close-modal">&times;</button>`,
-        heading: `<h1>!!heading!!</h1>`,
-        body: `<p>!!body!!</p>`,
-        button: `<button role="button" style="background-color:!!themeColor!!;" id="click-to-call"><a href="tel:+1!!phoneNumber!!">CALL NOW</a></button>`,
-        endTag: `</div>`
+                      <button role="button" class="close-modal">&times;</button>
+                        <h1>!!heading!!</h1>
+                        <p>!!body!!</p>
+                        <button role="button" style="background-color:!!themeColor!!;" id="click-to-call"><a href="tel:+1!!phoneNumber!!">!!buttonText!!</a></button>
+                        <p>!!phoneNumber!!</p>
+                    </div>`,
       },
     ],
     methods: {
@@ -29,14 +30,16 @@ const clickToCall = {
         sessionStorage.setItem("c2c-modal-closed", true);
       },
       buildTemplate(index) {
-        const template = clickToCall.modal.template[index];
-        //create html 
-        let strHtml = "";
-        for (const objProp of Object.keys(template)) {
-          clickToCall.processTemplateString(objProp, template);
-          strHtml += template[objProp]
-        }
-        clickToCall.modal.template.processedTemplate = strHtml;
+        const template = clickToCall.modal.templates[index];
+        //save our processed HTML + combine
+        clickToCall.processTemplateString(clickToCall.config.modal, template);
+        template.processedTemplate = template.container;
+
+        //create + append it
+        const modalContainer = document.createElement("div");
+        modalContainer.id = "modal-container"
+        modalContainer.innerHTML = template.processedTemplate;
+        document.body.appendChild(modalContainer);
       },
       initModal() {
         const modalBg = document.createElement("div");
@@ -44,14 +47,11 @@ const clickToCall = {
         clickToCall.modal.modalBg = modalBg;
         if (!this.getModalClosedState()) {
           document.body.appendChild(modalBg);
-
           //accepts template index
           //builds the modal HTML
           this.buildTemplate(0);
 
-          const modal = document.createElement("div")
-          modal.innerHTML = clickToCall.modal.template.processedTemplate;
-          document.body.appendChild(modal);
+          const modal = document.querySelector("#phone-modal");
           modal.querySelectorAll(".close-modal").forEach((btn, arr, i, modal) => {
             btn.addEventListener("click", function (e) {
               //"this" gets bound to click event target
@@ -69,45 +69,58 @@ const clickToCall = {
     },
   },
   phoneWidget: {
-    template: [
+    templates: [
       {
-        container: `<div id="phone-modal" class="c2c-modal phone--modal modal--open">
-        <button role="button" class="close-modal">&times;</button>`,
-        heading: `<h1>!!heading!!</h1>`,
-        body: `<p>!!body!!</p>`,
-        button: `<button role="button" style="background-color:!!themeColor!!;" id="click-to-call"><a href="tel:+1!!phoneNumber!!">CALL NOW</a></button>`,
-        endTag: `</div>`
+        container: `<div id="phone-widget" class="c2c-widget phone--widget">
+                      <button id="widget-click-to-call" class="phone-button" role="button" style="background-color:!!themeColor!!;border-color:!!themeColor!!">
+                        <span id="phone-icon" class="icon">
+                          <img src='!!openIcon!!' alt='Click to Call icon'/>
+                        </span>
+                        <span id="close-icon" class="icon" style="display: none;">
+                          <img src='!!closeIcon!!' alt='Click to Call icon'/>
+                        </span>
+                      </button>
+
+                      !!tooltip!!
+                    </div>
+                 
+                `,
+        tooltip: `<div id="widget-tooltip" class="tooltip">
+                    <h5>!!heading!!</h5>
+                    <p>!!body!!</p>
+                    <button class="tooltip-button" role="button" style="background-color:!!themeColor!!;">
+                      <a href="tel: +1!!phoneNumber!!">!!buttonText!!</a>
+                    </button>
+                  </div>`,
       },
     ],
     timeoutID: null,
     methods: {
+      buildTemplate(index) {
+        const template = clickToCall.phoneWidget.templates[index];
+        //save our processed HTML + combine
+        clickToCall.processTemplateString(clickToCall.config.phoneWidget, template);
+        template.processedTemplate = template.container.replace("!!tooltip!!", template.tooltip);
+
+        //create + append it
+        const phoneWidgetContainer = document.createElement("div");
+        phoneWidgetContainer.id = "phone-widget-container"
+        phoneWidgetContainer.innerHTML = template.processedTemplate;
+        document.body.appendChild(phoneWidgetContainer);
+      },
       initPhoneWidget() {
-        const phoneWidget = clickToCall.phoneWidget.target;
-        const themeColor = clickToCall.config?.themeColor;
+        //accepts template index
+        //builds the modal HTML
+        this.buildTemplate(0);
+        const phoneWidget = document.querySelector("#phone-widget");
         const phoneWidgetButton = phoneWidget.querySelector("button");
         const phoneWidgetIcons = phoneWidgetButton.querySelectorAll(".icon");
         const phoneWidgetTooltipButton = document.querySelector("#widget-tooltip").querySelector("button");
-        //add phone number and anchor tag
-        phoneWidgetTooltipButton.appendChild(clickToCall.createPhoneLink());
         //found that the phone animation is best at double the duration of the pulse
         phoneWidgetIcons.forEach((icon) => {
           icon.style.animationDuration = `${clickToCall.config.widgetCssAnimationTiming * 2
             }s`;
         });
-        //create text
-        clickToCall.createText("phoneWidget");
-
-        if (themeColor) {
-          //set theme color to buttons
-          phoneWidgetButton.style.backgroundColor = `${themeColor}`;
-          phoneWidgetButton.style.borderColor = `${themeColor}`;
-          clickToCall.phoneWidget.tooltip.querySelector(
-            "button"
-          ).style.backgroundColor = `${themeColor}`;
-        } else {
-          phoneWidgetButton.style.borderColor = `red`;
-        }
-
 
         phoneWidget.classList.add("open");
         this.beginWidgetAnimationInterval(phoneWidget);
@@ -120,7 +133,7 @@ const clickToCall = {
           });
       },
       openPhoneWidget(clicked) {
-        const widgetTooltip = clickToCall.phoneWidget.tooltip;
+        const widgetTooltip = document.querySelector("#widget-tooltip");
         if (!clickToCall.phoneWidget.tooltip || !widgetTooltip) {
           clickToCall.errors.errorType = "";
         }
@@ -143,7 +156,7 @@ const clickToCall = {
         //once we resolve() we have to clear the timeout, or else it runs infinitely every few seconds and blocks
         //any further animations
         return new Promise((resolve) => {
-          const button = clickToCall.phoneWidget.target.querySelector("button");
+          const button = document.querySelector("#widget-click-to-call");
           button.style.animationDuration = `${clickToCall.config.widgetCssAnimationTiming}s`;
           button.classList.add("animate-button");
           //remove the class so we can animate again
@@ -156,7 +169,7 @@ const clickToCall = {
       removeAnimation() {
         //use a global id set in the phoneWidget object to reference the timeout function
         clearTimeout(clickToCall.phoneWidget.timeoutID);
-        const button = clickToCall.phoneWidget.target.querySelector("button");
+        const button = document.querySelector("#widget-click-to-call");
         button.classList.remove("animate-button");
       },
       async animationHandler() {
@@ -211,97 +224,51 @@ const clickToCall = {
       );
     },
   },
-  processTemplateString(prop, templateObj) {
-    //re-usable way to remove placceholders and add the values we want into the template
-    const placeholder = `!!${prop}!!`;
-
-    if (prop === "button") {
-      templateObj[prop] = templateObj[prop].replace("!!themeColor!!", clickToCall.config.themeColor);
-      templateObj[prop] = templateObj[prop].replace("!!phoneNumber!!", clickToCall.config.phoneNumber);
-    } else {
-      templateObj[prop] = templateObj[prop].replace(placeholder, clickToCall.config.modal[prop]);
-    }
+  processTemplateString(templateConfigObj, templateObj) {
+    Object.keys(templateObj).forEach((templateObjKey) => {
+      let target = templateObj[templateObjKey];
+      for (const prop of Object.keys(templateConfigObj)) {
+        target = target.replaceAll(`!!${prop}!!`, templateConfigObj[prop])
+      }
+      target = target.replaceAll("!!phoneNumber!!", `+1${clickToCall.config.phoneNumber}`)
+      target = target.replaceAll("!!themeColor!!", `${clickToCall.config.themeColor}`)
+      templateObj[templateObjKey] = target;
+    })
   },
   checkConfigValidity(userConfig) {
-    //each of these will short-circuit to null if document.querySelector fails
-    const modalExists = document.querySelector(
-      `#${userConfig?.modalTarget || null}`
-    );
-    const widgetExists = document.querySelector(
-      `#${userConfig?.phoneWidgetTarget || null}`
-    );
-    const tooltipExists = document.querySelector(
-      `#${userConfig?.tooltipId || null}`
-    );
-    //if our user provided config is null, or invalid
-    if (
-      !userConfig ||
-      !userConfig.hasOwnProperty("modalTarget") ||
-      !userConfig.hasOwnProperty("phoneWidgetTarget") ||
-      !userConfig.hasOwnProperty("tooltipId")
-    ) {
-      this.errors.errorType = "invalidConfig";
-      this.errors.showError();
-      return false;
-    }
-    //is any of our mandatory HTML elements are not present in the DOM
-    else if (!modalExists) {
-      this.errors.errorType = "nullModal";
-      this.errors.showError();
-      return false;
-    } else if (!widgetExists) {
-      this.errors.errorType = "nullPhoneWidget";
-      this.errors.showError();
-      return false;
-    } else if (!tooltipExists) {
-      this.errors.errorType = "nullPhoneWidgetTooltip";
-      this.errors.showError();
-      return false;
-    } else {
-      return true;
-    }
+
   },
   async init(config) {
-    //only initialize if we don't have config errors
-    if (this.checkConfigValidity(config)) {
-      this.modal.target = document.querySelector(`#${config.modalTarget}`);
-      this.phoneWidget.target = document.querySelector(
-        `#${config.phoneWidgetTarget}`
-      );
-      this.phoneWidget.tooltip = document.querySelector(`#${config.tooltipId}`);
-      //optinal values
-      config.widgetAnimationIntervalTiming =
-        config?.widgetAnimationIntervalTiming * 1000 || 6000;
-      config.widgetCssAnimationTiming = config?.widgetCssAnimationTiming || 1.5;
-      config.themeColor = config?.themeColor;
+    //may need to check config for validity
+    //optinal values
+    config.widgetAnimationIntervalTiming =
+      config?.widgetAnimationIntervalTiming * 1000 || 6000;
+    config.widgetCssAnimationTiming = config?.widgetCssAnimationTiming || 1.5;
+    config.themeColor = config?.themeColor;
 
-      //if we don't have a user provided phone number, go get one 
-      if (!config?.phoneNumber) {
-        //conditional API call
-        const getPhoneNumber = fetch("https://catfact.ninja/fact").then((resp) => {
-          return resp.json();
-        });
+    //if we don't have a user provided phone number, go get one 
+    if (!config?.phoneNumber) {
+      //conditional API call
+      const getPhoneNumber = fetch("https://catfact.ninja/fact").then((resp) => {
+        return resp.json();
+      });
 
-        getPhoneNumber.then((data) => {
-          config.phoneNumber = data;
-          console.log(data);
-          //expose config
-          this.config = config;
-          //initialize
-          this.modal.methods.initModal();
-          console.log(`Click to Call JS initialized.`);
-        });
-
-      } else {
+      getPhoneNumber.then((data) => {
+        config.phoneNumber = data;
+        console.log(data);
         //expose config
         this.config = config;
         //initialize
         this.modal.methods.initModal();
         console.log(`Click to Call JS initialized.`);
-      }
+      });
 
     } else {
-      console.log(`Click to Call JS initialization failed.`);
+      //expose config
+      this.config = config;
+      //initialize
+      this.modal.methods.initModal();
+      console.log(`Click to Call JS initialized.`);
     }
   },
 };
