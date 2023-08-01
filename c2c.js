@@ -10,7 +10,6 @@ const clickToCall = {
                         <h1>!!heading!!</h1>
                         <p>!!body!!</p>
                         <button role="button" style="background-color:!!themeColor!!;" id="click-to-call"><a href="tel:+1!!phoneNumber!!">!!buttonText!!</a></button>
-                        <p>!!phoneNumber!!</p>
                     </div>`,
       },
     ],
@@ -194,36 +193,6 @@ const clickToCall = {
       },
     },
   },
-  errors: {
-    errorType: null,
-    errorMsgs: {
-      nullModal:
-        "Target modal HTML element can't be found, please check that the modal id in your config object is correct.\n\n Can't initilize modal.",
-      nullPhoneWidget:
-        "Target phone widget HTML element can't be found, please check that the phone widget id in your config object is correct.\n\n Can't initilize phone widget.",
-      nullPhoneWidgetTooltip:
-        "Target phone widget tooltip HTML element can't be found, please check that the phone widget tooltip id in your config object is correct.\n\n Can't initilize phone widget tooltip.",
-      invalidConfig: `Invalid configuration object, please pass an object to clickToCall.init() with the follwing keys and valid HTML element id's as the values. See example object below \n
-      const exampleConfig = {
-          modalTarget: 'phone-modal',
-          phoneWidgetTarget: 'phone-widget',
-          tooltipId: 'widget-tooltip',\n
-          //Optional values:
-          //control the length between widget animations 
-          widgetAnimationIntervalTiming: 5,
-          //control the amount of time the widget animation takes
-          widgetCssAnimationTiming: 1.5,
-          //control the overall theme color of widget and modal buttons
-          themeColor: 'rgb(35, 151, 56)'
-      }\n
-          `,
-    },
-    showError() {
-      console.error(
-        `Error: Click to Call JS \n\n ${this.errorMsgs[this.errorType]}`
-      );
-    },
-  },
   processTemplateString(templateConfigObj, templateObj) {
     Object.keys(templateObj).forEach((templateObjKey) => {
       let target = templateObj[templateObjKey];
@@ -234,9 +203,6 @@ const clickToCall = {
       target = target.replaceAll("!!themeColor!!", `${clickToCall.config.themeColor}`)
       templateObj[templateObjKey] = target;
     })
-  },
-  checkConfigValidity(userConfig) {
-
   },
   async init(config) {
     //may need to check config for validity
