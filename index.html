@@ -23,16 +23,20 @@
     <script>
         //all we have to do to get started is pass the init method an object with the modal html id, the phone widget id, and the phone widget tooltip id
         const clickToCallConfig = clickToCall.init({
-            //pass country code
+            //do not pass country code and do not format 
+            //pass as 10-digit string
             phoneNumber: '2036313892',
-            //variable text 
+            //variables for modal text 
             modal: {
                 heading: `Free Consultation`,
                 body: `Call now to get connected, agents standing by to help you.`,
                 buttonText: `Call Now!`
             },
+            //variables for widget text
             phoneWidget: {
+                //path to icon to be clicked to open widget
                 openIcon: `open.png`,
+                //path to icon to be clicked to close widget
                 closeIcon: `close.png`,
                 heading: `LICENSED AGENT STANDING BY`,
                 body: `Get a free, no-obligation quote. Call Now!`,
@@ -42,6 +46,7 @@
             //pass any timing values as numerical seconds
             widgetAnimationIntervalTiming: 6,
             widgetCssAnimationTiming: 1.5,
+            //change the color of buttons and the widget
             themeColor: 'rgb(35, 151, 56)',
         });
     </script>
