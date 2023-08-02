@@ -7,9 +7,11 @@ const clickToCall = {
       {
         container: `<div id="phone-modal" class="c2c-modal phone--modal modal--open">
                       <button role="button" class="close-modal">&times;</button>
+                        <img class="modal-img" src="!!modalImg!!" alt="Click to Call icon"/>
                         <h1>!!heading!!</h1>
-                        <p>!!body!!</p>
-                        <button role="button" style="background-color:!!themeColor!!;" id="click-to-call"><a href="tel:+1!!phoneNumber!!">!!buttonText!!</a></button>
+                        <div class="body-content">!!body!!</div>
+                        <button role="button" style="background-color:!!themeColor!!;" id="click-to-call"><a href="tel:!!phoneNumber!!">!!buttonText!!</a>
+                        </button>
                     </div>`,
       },
     ],
@@ -88,7 +90,7 @@ const clickToCall = {
                     <h5>!!heading!!</h5>
                     <p>!!body!!</p>
                     <button class="tooltip-button" role="button" style="background-color:!!themeColor!!;">
-                      <a href="tel: +1!!phoneNumber!!">!!buttonText!!</a>
+                      <a href="tel:!!phoneNumber!!">!!buttonText!!</a>
                     </button>
                   </div>`,
       },
@@ -133,9 +135,6 @@ const clickToCall = {
       },
       openPhoneWidget(clicked) {
         const widgetTooltip = document.querySelector("#widget-tooltip");
-        if (!clickToCall.phoneWidget.tooltip || !widgetTooltip) {
-          clickToCall.errors.errorType = "";
-        }
         if (!widgetTooltip.classList.contains("open")) {
           widgetTooltip.classList.add("open");
           document.querySelector("#phone-icon").style.display = "none";
@@ -194,15 +193,35 @@ const clickToCall = {
     },
   },
   processTemplateString(templateConfigObj, templateObj) {
+    //for each top-level object in the template, do the following
     Object.keys(templateObj).forEach((templateObjKey) => {
       let target = templateObj[templateObjKey];
+      //loop through all keys in the nested objects within the template
       for (const prop of Object.keys(templateConfigObj)) {
+        if (templateConfigObj[prop] instanceof Array) {
+          let str = "";
+          templateConfigObj[prop].forEach((p, i, arr) => {
+            str += `<p class="body-item-${i + 1}">${p}</p>`;
+            templateConfigObj[prop] = str;
+          });
+        } //replace the placeholder text w/ corresponding values from configs
         target = target.replaceAll(`!!${prop}!!`, templateConfigObj[prop])
+
       }
+      //these values occur more than once, so let's run a one-time replaceAll for each top-level object in the template
       target = target.replaceAll("!!phoneNumber!!", `+1${clickToCall.config.phoneNumber}`)
+      target = target.replaceAll("!!parsedPhoneNumber!!", `${this.formatPhoneNumber(clickToCall.config.phoneNumber)}`)
       target = target.replaceAll("!!themeColor!!", `${clickToCall.config.themeColor}`)
       templateObj[templateObjKey] = target;
     })
+  },
+  formatPhoneNumber(phoneNumberString) {
+    const cleaned = ('' + phoneNumberString).replace(/\D/g, '');
+    const match = cleaned.match(/^(\d{3})(\d{3})(\d{4})$/);
+    if (match) {
+      return '(' + match[1] + ') ' + match[2] + '-' + match[3];
+    }
+    return null;
   },
   async init(config) {
     //may need to check config for validity
