@@ -231,6 +231,7 @@ html,
 body {
   height: 100%;
   background-color: beige;
+  font-family: sans-serif;
 }
 .c2c-modal button,
 .c2c-widget {
@@ -243,6 +244,9 @@ body {
   padding: 0.5em;
   color: inherit;
   text-decoration: none;
+}
+.c2c-widget button a {
+  margin-left: -0.5em;
 }
 .c2c-modal {
   position: fixed;
@@ -262,12 +266,20 @@ body {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  text-align: center;
 }
 .c2c-modal.modal--open {
   visibility: visible;
   opacity: 1;
   pointer-events: auto;
   top: 50%;
+}
+.c2c-modal .modal-img {
+  max-width: 70px;
+  margin: auto;
+}
+.c2c-modal button {
+  margin-top: 1em;
 }
 .c2c-modal button:not(.close-modal) {
   border: 0;
