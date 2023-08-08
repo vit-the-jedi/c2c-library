@@ -13,12 +13,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="c2c.css">
 
-    <style>
-        .c2c-modal .body-item-2 {
-            font-size: 1.2em;
-            font-weight: bold;
-        }
-    </style>
 </head>
 
 <body>
@@ -33,32 +27,35 @@
             //do not pass country code and do not format 
             //pass as 10-digit string
             phoneNumber: '2036313892',
-            //variables for modal layout
-            modal: {
-                modalImg: 'images/icons/modal-img.png',
-                heading: `Free Consultation`,
-                //if you want multiple text elements, pass as an array
-                body: [`Call now to get connected, agents standing by to help you. We are committed to your satisfaction.`,
-                    'Click "Call" to be connected'],
-                buttonText: `Call: !!parsedPhoneNumber!!`,
-            },
-            //variables for widget layout
-            phoneWidget: {
-                //path to icon to be clicked to open widget
-                openIcon: `images/icons/open.png`,
-                //path to icon to be clicked to close widget
-                closeIcon: `images/icons/close.png`,
-                heading: `LICENSED AGENT STANDING BY`,
-                body: `Get a free, no-obligation quote. Call Now!`,
-                buttonText: `Call: !!parsedPhoneNumber!!`,
-            },
-            //optional values
-            //pass any timing values as numerical seconds
-            widgetAnimationIntervalTiming: 6,
-            widgetCssAnimationTiming: 1.5,
             //change the color of buttons and the widget
             themeColor: 'rgb(35, 151, 56)',
         });
+
+        //override default behaviors
+        //variables for modal layout
+        // modal: {
+        //     modalImg: 'images/icons/modal-img.png',
+        //         heading: `HeadingOverride`,
+        //             //if you want multiple text elements, pass as an array
+        //             body: [`Call now to get connected, agents standing by to help you. We are committed to your satisfaction.`,
+        //                 'Click "Call" to be connected'],
+        //                 buttonText: `Call: !!parsedPhoneNumber!!`,
+        //                     tty: 'Available Mon-Fri, 9am to 6pm EST (TTY:711)',
+        //     },
+        //variables for widget layout
+        // phoneWidget: {
+        //     //path to icon to be clicked to open widget
+        //     openIcon: `images/icons/open.png`,
+        //         //path to icon to be clicked to close widget
+        //         closeIcon: `images/icons/close.png`,
+        //             //heading: `LICENSED AGENT STANDING BY`,
+        //             body: `Get a free, no-obligation quote. Call Now!`,
+        //                 buttonText: `Call: !!parsedPhoneNumber!!`,
+        //     },
+            //optional values
+            //pass any timing values as numerical seconds
+            // widgetAnimationIntervalTiming: 6,
+            //     widgetCssAnimationTiming: 1.5,
     </script>
 </body>
 

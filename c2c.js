@@ -5,13 +5,14 @@ const clickToCall = {
   modal: {
     templates: [
       {
-        container: `<div id="phone-modal" class="c2c-modal phone--modal modal--open">
+        container: `<div id="phone-modal" class="c2c-modal phone--modal">
                       <button role="button" class="close-modal">&times;</button>
                         <img class="modal-img" src="!!modalImg!!" alt="Click to Call icon"/>
                         <h1>!!heading!!</h1>
                         <div class="body-content">!!body!!</div>
                         <button role="button" style="background-color:!!themeColor!!;" id="click-to-call"><a href="tel:!!phoneNumber!!">!!buttonText!!</a>
                         </button>
+                        <p class="tty-disclosure">!!tty!!</p>
                     </div>`,
       },
     ],
@@ -41,10 +42,13 @@ const clickToCall = {
         modalContainer.id = "modal-container"
         modalContainer.innerHTML = template.processedTemplate;
         document.body.appendChild(modalContainer);
+        setTimeout(() => {
+          modalContainer.querySelector(".c2c-modal").classList.add("modal--open")
+        }, 1000)
       },
       initModal() {
         const modalBg = document.createElement("div");
-        modalBg.setAttribute("style", "background:rgba(0,0,0,0.5);position:fixed;height:100%;width:100%; z-index:998");
+        modalBg.setAttribute("style", "background:rgba(0,0,0,0.5);position:fixed;height:100%;width:100%; z-index:998;top:0;left:0");
         clickToCall.modal.modalBg = modalBg;
         if (!this.getModalClosedState()) {
           document.body.appendChild(modalBg);
@@ -205,13 +209,13 @@ const clickToCall = {
             templateConfigObj[prop] = str;
           });
         } //replace the placeholder text w/ corresponding values from configs
-        target = target.replaceAll(`!!${prop}!!`, templateConfigObj[prop])
+        target = target.replaceAll(`!!${prop}!!`, templateConfigObj[prop]);
 
       }
       //these values occur more than once, so let's run a one-time replaceAll for each top-level object in the template
       target = target.replaceAll("!!phoneNumber!!", `+1${clickToCall.config.phoneNumber}`)
       target = target.replaceAll("!!parsedPhoneNumber!!", `${this.formatPhoneNumber(clickToCall.config.phoneNumber)}`)
-      target = target.replaceAll("!!themeColor!!", `${clickToCall.config.themeColor}`)
+      target = target.replaceAll("!!themeColor!!", `${clickToCall.config?.themeColor || 'red'}`)
       templateObj[templateObjKey] = target;
     })
   },
@@ -223,6 +227,23 @@ const clickToCall = {
     }
     return null;
   },
+  checkTemplateConfigs(config) {
+    const definedConfigs = {
+      modal: null,
+      phoneWidget: null,
+    };
+    //check if modal object is totally empty
+    //check if any sub-prop is empty
+    //push each empty prop into the array at corresponding key
+    //repeat for phone widget
+    if (config.modal) {
+      definedConfigs.modal = Object.keys(config.modal).filter((key) => typeof config.modal[key] !== null);
+    }
+    if (config.phoneWidget) {
+      definedConfigs.phoneWidget = Object.keys(config.phoneWidget).filter((key) => typeof config.phoneWidget[key] !== null);
+    }
+    return definedConfigs;
+  },
   async init(config) {
     //may need to check config for validity
     //optinal values
@@ -231,7 +252,52 @@ const clickToCall = {
     config.widgetCssAnimationTiming = config?.widgetCssAnimationTiming || 1.5;
     config.themeColor = config?.themeColor;
 
-    //if we don't have a user provided phone number, go get one 
+
+    //maps 
+    const modalTemplateConfigMap = new Map();
+    //set defaults
+    modalTemplateConfigMap.set("heading", 'Liscensed Agents Standing By!');
+    modalTemplateConfigMap.set("body", ['We found a licensed insurance agent to walk you through your options shortly.', 'Click "CALL" to be connected.']);
+    modalTemplateConfigMap.set("buttonText", 'Call: !!parsedPhoneNumber!!');
+    modalTemplateConfigMap.set("tty", 'Available Mon-Fri, 9am to 6pm EST (TTY:711)');
+
+
+    const phoneWidgetTemplateConfigMap = new Map();
+
+    phoneWidgetTemplateConfigMap.set("openIcon", "images/icons/open.png");
+    phoneWidgetTemplateConfigMap.set("closeIcon", "images/icons/close.png");
+    phoneWidgetTemplateConfigMap.set("heading", "LICENSED AGENT STANDING BY");
+    phoneWidgetTemplateConfigMap.set("body", "Get a free, no-obligation quote. Call Now!");
+    phoneWidgetTemplateConfigMap.set("buttonText", "Call: !!parsedPhoneNumber!!");
+
+
+    const templateConfigs = this.checkTemplateConfigs(config);
+
+    //check for templating configs
+    if (!templateConfigs.modal) {
+      config.modal = {};
+      modalTemplateConfigMap.forEach((value, key) => {
+        config.modal[key] = value;
+      })
+    } else {
+      //check if any keys in config are undefined
+      modalTemplateConfigMap.forEach((value, key) => {
+        if (!config.modal[key]) config.modal[key] = value;
+      })
+    }
+    //check for templating configs
+    if (!templateConfigs.phoneWidget) {
+      config.phoneWidget = {};
+      phoneWidgetTemplateConfigMap.forEach((value, key) => {
+        config.phoneWidget[key] = value;
+      })
+    } else {
+      //check if any keys in config are undefined
+      phoneWidgetTemplateConfigMap.forEach((value, key) => {
+        if (!config.phoneWidget[key]) config.phoneWidget[key] = value;
+      })
+    }
+    //if we don't have a user provided phone number,we can assume we need to go get one 
     if (!config?.phoneNumber) {
       //conditional API call
       const getPhoneNumber = fetch("https://catfact.ninja/fact").then((resp) => {
@@ -248,7 +314,8 @@ const clickToCall = {
         console.log(`Click to Call JS initialized.`);
       });
 
-    } else {
+    }
+    else {
       //expose config
       this.config = config;
       //initialize
