@@ -12,14 +12,19 @@
     <meta name="description" content="">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="c2c.css">
-
+    <style>
+        .regionMain {
+            min-height: 100vh;
+            width: 100%
+        }
+    </style>
 </head>
 
 <body>
     <!--[if lt IE 7]>
             <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="#">upgrade your browser</a> to improve your experience.</p>
         <![endif]-->
-    </div>
+    <div class="regionMain"></div>
     <script src="c2c.js"></script>
     <script>
         //all we have to do to get started is pass the init method an object with the modal html id, the phone widget id, and the phone widget tooltip id
@@ -56,6 +61,7 @@
             //pass any timing values as numerical seconds
             // widgetAnimationIntervalTiming: 6,
             //     widgetCssAnimationTiming: 1.5,
+            //anchorPoint:footer
     </script>
 </body>
 

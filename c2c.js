@@ -111,7 +111,7 @@ const clickToCall = {
         const phoneWidgetContainer = document.createElement("div");
         phoneWidgetContainer.id = "phone-widget-container"
         phoneWidgetContainer.innerHTML = template.processedTemplate;
-        document.body.appendChild(phoneWidgetContainer);
+        clickToCall.config.anchorPoint.appendChild(phoneWidgetContainer);
       },
       initPhoneWidget() {
         //accepts template index
@@ -256,6 +256,7 @@ const clickToCall = {
     //maps 
     const modalTemplateConfigMap = new Map();
     //set defaults
+    modalTemplateConfigMap.set("modalImg", "https://djk97zng6lbya.cloudfront.net/2023/08/02/15/59/28/092cc561-68a7-4473-90b1-252c139fd559.png");
     modalTemplateConfigMap.set("heading", 'Liscensed Agents Standing By!');
     modalTemplateConfigMap.set("body", ['We found a licensed insurance agent to walk you through your options shortly.', 'Click "CALL" to be connected.']);
     modalTemplateConfigMap.set("buttonText", 'Call: !!parsedPhoneNumber!!');
@@ -264,8 +265,8 @@ const clickToCall = {
 
     const phoneWidgetTemplateConfigMap = new Map();
 
-    phoneWidgetTemplateConfigMap.set("openIcon", "images/icons/open.png");
-    phoneWidgetTemplateConfigMap.set("closeIcon", "images/icons/close.png");
+    phoneWidgetTemplateConfigMap.set("openIcon", "https://djk97zng6lbya.cloudfront.net/2023/08/02/14/14/50/19395e4c-0204-4613-bca7-3ddae8afa892.png");
+    phoneWidgetTemplateConfigMap.set("closeIcon", "https://djk97zng6lbya.cloudfront.net/2023/08/02/14/14/42/58d25837-f7bb-474f-9f68-5cb2115f0f7d.png");
     phoneWidgetTemplateConfigMap.set("heading", "LICENSED AGENT STANDING BY");
     phoneWidgetTemplateConfigMap.set("body", "Get a free, no-obligation quote. Call Now!");
     phoneWidgetTemplateConfigMap.set("buttonText", "Call: !!parsedPhoneNumber!!");
@@ -297,6 +298,11 @@ const clickToCall = {
         if (!config.phoneWidget[key]) config.phoneWidget[key] = value;
       })
     }
+
+    //set anchor point to actual DOM element
+    config.anchorPoint = document.querySelector(`${config.anchorPoint}`);
+
+
     //if we don't have a user provided phone number,we can assume we need to go get one 
     if (!config?.phoneNumber) {
       //conditional API call
@@ -313,16 +319,37 @@ const clickToCall = {
         this.modal.methods.initModal();
         console.log(`Click to Call JS initialized.`);
       });
+    }
+    //check if null , if yes reset to document body
+    if (!config?.anchorPoint) {
+      const regionMainExists = document.querySelector(".regionMain");
+      if (regionMainExists) {
+        config.anchorPoint = regionMainExists;
+      }
+      else {
+        config.anchorPoint = document.body;
+      }
+    }
+    //expose config
+    this.config = config;
 
+    //if we havent closed the modal yet, preload widget images
+    if (!sessionStorage.getItem("modal-closed")) {
+      clickToCall.preloadElement(config.phoneWidget.openIcon);
+      clickToCall.preloadElement(config.phoneWidget.closeIcon);
     }
-    else {
-      //expose config
-      this.config = config;
-      //initialize
-      this.modal.methods.initModal();
-      console.log(`Click to Call JS initialized.`);
-    }
+
+    //initialize
+    this.modal.methods.initModal();
+    console.log(`Click to Call JS initialized.`);
   },
+  preloadElement(link) {
+    const docLink = document.createElement("link");
+    docLink.rel = "preload";
+    docLink.href = link;
+    docLink.as = "image"
+    document.head.appendChild(docLink);
+  }
 };
 
 
