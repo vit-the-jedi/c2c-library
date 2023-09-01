@@ -6,14 +6,15 @@ const clickToCall = {
     templates: [
       {
         container: `<div id="phone-modal" class="c2c-modal phone--modal">
-                      <button role="button" class="close-modal">&times;</button>
-                        <img class="modal-img" src="!!modalImg!!" alt="Click to Call icon"/>
-                        <h1>!!heading!!</h1>
-                        <div class="body-content">!!body!!</div>
-                        <button role="button" style="background-color:!!themeColor!!;" id="click-to-call"><a href="tel:!!phoneNumber!!">!!buttonText!!</a>
-                        </button>
-                        <p class="tty-disclosure">!!tty!!</p>
-                    </div>`,
+          <button role="button" class="close-modal">&times;</button>
+            <img class="modal-img" src="!!modalImg!!" alt="Click to Call icon"/>
+            <h1>!!heading!!</h1>
+            <div class="body-content">!!body!!</div>
+            <button role="button" style="background-color:!!themeColor!!;" id="click-to-call">
+            <a class="c2c-linkout" href="tel:!!phoneNumber!!" target="_parent">!!buttonText!!</a>
+            </button>
+            <p class="tty-disclosure">!!tty!!</p>
+        </div>`,
       },
     ],
     methods: {
@@ -42,10 +43,13 @@ const clickToCall = {
         modalContainer.id = "modal-container"
         modalContainer.innerHTML = template.processedTemplate.html;
         document.body.appendChild(modalContainer);
+        setTimeout(() => {
+          modalContainer.querySelector(".c2c-modal").classList.add("modal--open")
+        }, 1000)
       },
       initModal() {
         const modalBg = document.createElement("div");
-        modalBg.setAttribute("style", "background:rgba(0,0,0,0.5);position:fixed;height:100%;width:100%; z-index:998");
+        modalBg.setAttribute("style", "background:rgba(0,0,0,0.5);position:fixed;height:100%;width:100%; z-index:998;top:0;left:0");
         clickToCall.modal.modalBg = modalBg;
         if (!this.getModalClosedState()) {
           document.body.appendChild(modalBg);
@@ -221,20 +225,30 @@ const clickToCall = {
     },
   },
   processTemplateString(templateConfigObj, templateObj) {
-    //for each top-level object in the template, do the following
-    Object.keys(templateObj).forEach((templateObjKey) => {
-      let target = templateObj[templateObjKey];
-      //loop through all keys in the nested objects within the template
-      for (const prop of Object.keys(templateConfigObj)) {
-        if (templateConfigObj[prop] instanceof Array) {
-          let str = "";
-          templateConfigObj[prop].forEach((p, i, arr) => {
-            str += `<p class="body-item-${i + 1}">${p}</p>`;
-            templateConfigObj[prop] = str;
-          });
-        } //replace the placeholder text w/ corresponding values from configs
-        target = target.replaceAll(`!!${prop}!!`, templateConfigObj[prop]);
-
+    //for each top-level object in the template, do the followings
+    let str;
+    templateObj.processedTemplate = {};
+    Object.keys(templateObj).forEach((key) => {
+      if (key !== "processedTemplate") {
+        templateObj.processedTemplate[key] = {};
+        str = templateObj[key];
+        Object.keys(templateConfigObj).forEach((prop) => {
+          if (templateConfigObj[prop] instanceof Array) {
+            //create new str to hold each array value
+            let arrStr = "";
+            templateConfigObj[prop].forEach((p, i, arr) => {
+              arrStr += `<p class="body-item-${i + 1}">${p}</p>`;
+            })
+            str = str.replaceAll(`!!${prop}!!`, arrStr);
+          }
+          //replace the placeholder text w/ corresponding values from configs
+          str = str.replaceAll(`!!${prop}!!`, templateConfigObj[prop]);
+        })
+        //these values occur more than once, so let's run a one-time replaceAll for each top-level object in the template
+        str = str.replaceAll("!!phoneNumber!!", `+1${clickToCall.config.phoneNumber}`);
+        str = str.replaceAll("!!parsedPhoneNumber!!", `${this.formatPhoneNumber(clickToCall.config.phoneNumber)}`)
+        str = str.replaceAll("!!themeColor!!", `${clickToCall.config?.themeColor || 'red'}`);
+        templateObj.processedTemplate[key] = str;
       }
     })
   },
@@ -245,6 +259,23 @@ const clickToCall = {
       return '(' + match[1] + ') ' + match[2] + '-' + match[3];
     }
     return null;
+  },
+  checkTemplateConfigs(config) {
+    const definedConfigs = {
+      modal: null,
+      phoneWidget: null,
+    };
+    //check if modal object is totally empty
+    //check if any sub-prop is empty
+    //push each empty prop into the array at corresponding key
+    //repeat for phone widget
+    if (config.modal) {
+      definedConfigs.modal = Object.keys(config.modal).filter((key) => typeof config.modal[key] !== null);
+    }
+    if (config.phoneWidget) {
+      definedConfigs.phoneWidget = Object.keys(config.phoneWidget).filter((key) => typeof config.phoneWidget[key] !== null);
+    }
+    return definedConfigs;
   },
   async init(config) {
     //may need to check config for validity
@@ -329,16 +360,12 @@ const clickToCall = {
         //default if fetch fails
         config.phoneNumber = getDefaultNumber();
       });
+      //conditional API call
+      await getPhoneNumber();
     }
     //check if null , if yes reset to document body
     if (!config?.anchorPoint) {
-      const regionMainExists = document.querySelector(".regionMain");
-      if (regionMainExists) {
-        config.anchorPoint = regionMainExists;
-      }
-      else {
-        config.anchorPoint = document.body;
-      }
+      config.anchorPoint = document.body;
     }
     //expose config
     this.config = config;
@@ -351,6 +378,27 @@ const clickToCall = {
 
     //initialize
     this.modal.methods.initModal();
+    //create survey observer so we can watch for page changes inside impressure
+    const observerConfig = { childList: true };
+    const observeSurvey = (mutationList, observer) => {
+      mutationList.forEach((mutation) => {
+        if (mutation.removedNodes && mutation.removedNodes[0].classList.contains("page")) {
+          //remove old observers to keep things clean
+          clickToCall.phoneWidget.intersectionObserver.disconnect();
+          //re-initialize intersection observer on new footer created from react
+          clickToCall.phoneWidget.methods.createWidgetIntersectionObserver();
+        }
+      });
+    }
+
+    const pageObserver = new MutationObserver(observeSurvey);
+    //begin survey observer
+    pageObserver.observe(document.querySelector(".survey"), observerConfig);
+
+    //create resize observer so we can keep the phone widget in the correct place above the footer, even on window resize
+    window.addEventListener("resize", function (ev) {
+      clickToCall.footerSizeHandler();
+    });
     console.log(`Click to Call JS initialized.`);
   },
   preloadElement(link) {
@@ -359,7 +407,34 @@ const clickToCall = {
     docLink.href = link;
     docLink.as = "image"
     document.head.appendChild(docLink);
-  }
+  },
+  footerSizeHandler() {
+    if (clickToCall.phoneWidget.target.classList.contains("widget--footer")) {
+      const footer = document.querySelector("footer");
+      const footerHeight = footer.getBoundingClientRect().height;
+      const widgetStyles = window.getComputedStyle(clickToCall.phoneWidget.target);
+      const widgetHeight = clickToCall.phoneWidget.target.getBoundingClientRect().height;
+      console.log(widgetStyles.getPropertyValue("right"));
+      clickToCall.phoneWidget.target.style.top = (footerHeight * -1) - widgetHeight - parseFloat(widgetStyles.getPropertyValue("right"), 10) + "px";
+    }
+  },
+  getters: {
+    //call this to expose the configs for the modal and widget
+    //we can call this function and push the result to analytics data layer so we can see what the configs were for each page
+    getConfigs() {
+      const cleanConfigs = {
+        modal: this.modalConfigs(),
+        phoneWidget: this.widgetConfigs(),
+      }
+      return cleanConfigs;
+    },
+    modalConfigs() {
+      return clickToCall.config.modal;
+    },
+    widgetConfigs() {
+      return clickToCall.config.phoneWidget;
+    }
+  },
 };
 
 
