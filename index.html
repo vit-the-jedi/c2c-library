@@ -22,44 +22,26 @@
 </head>
 
 <body>
+    <div class="survey"></div>
     <!--[if lt IE 7]>
             <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="#">upgrade your browser</a> to improve your experience.</p>
         <![endif]-->
+    <div class="regionMain">
+        <a href="tel:+12036313892"></a>
     </div>
     <script src="c2c.js"></script>
     <script>
         //all we have to do to get started is pass the init method an object with the modal html id, the phone widget id, and the phone widget tooltip id
         const clickToCallConfig = clickToCall.init({
-            //do not pass country code and do not format 
+            //do not pass country code and do not format phone number 
             //pass as 10-digit string
-            phoneNumber: '2036313892',
-            //variables for modal layout
-            modal: {
-                modalImg: 'images/icons/modal-img.png',
-                heading: `Free Consultation`,
-                //if you want multiple text elements, pass as an array
-                body: [`Call now to get connected, agents standing by to help you. We are committed to your satisfaction.`,
-                    'Click "Call" to be connected'],
-                buttonText: `Call: !!parsedPhoneNumber!!`,
-            },
-            //variables for widget layout
-            phoneWidget: {
-                //path to icon to be clicked to open widget
-                openIcon: `images/icons/open.png`,
-                //path to icon to be clicked to close widget
-                closeIcon: `images/icons/close.png`,
-                heading: `LICENSED AGENT STANDING BY`,
-                body: `Get a free, no-obligation quote. Call Now!`,
-                buttonText: `Call: !!parsedPhoneNumber!!`,
-            },
-            //optional values
-            //pass any timing values as numerical seconds
-            widgetAnimationIntervalTiming: 6,
-            widgetCssAnimationTiming: 1.5,
-            //change the color of buttons and the widget
-            themeColor: 'rgb(35, 151, 56)',
+            //+1 (866) 511-7916
+            phoneNumber: '8665117916',
+            //pass a color to match branding, if nothing is passed, defaults to red
+            themeColor: '#EB034C',
         });
     </script>
 </body>
+<footer></footer>
 
 </html>

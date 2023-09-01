@@ -227,26 +227,51 @@
   }
 }
 
-html,
-body {
-  height: 100%;
-  background-color: beige;
-  font-family: sans-serif;
-}
 .c2c-modal button,
 .c2c-widget {
   cursor: pointer;
+}
+.c2c-modal,
+.c2c-widget {
+  font-size: 16px;
+}
+
+.c2c-modal p,
+.c2c-widget p,
+.c2c-modal button,
+.c2c-widget button {
+  font-size: 1em;
+  line-height: 1.3em;
+}
+.c2c-modal h1 {
+  font-size: 2em;
+  margin: auto;
+  font-weight: bold;
+}
+.c2c-widget h5 {
+  font-size: 1.2em;
+  margin: auto;
+  font-weight: bold;
+  margin: 0.5em;
+}
+.c2c-widget p {
+  margin-bottom: 1em;
+}
+.c2c-widget button,
+.c2c-modal button {
+  padding: 0 !important;
+}
+.c2c-linkout {
+  padding: 0.5em 0;
 }
 .c2c-modal button a,
 .c2c-widget button a {
   width: 100%;
   display: block;
-  padding: 0.5em;
   color: inherit;
   text-decoration: none;
-}
-.c2c-widget button a {
-  margin-left: -0.5em;
+  font-weight: bold;
+  color: #fff;
 }
 .c2c-modal {
   position: fixed;
@@ -257,7 +282,8 @@ body {
   opacity: 0.5;
   pointer-events: none;
   transition: opacity 1s;
-  width: 350px;
+  max-width: 350px;
+  width: 95%;
   left: 50%;
   transform: translate(-50%, -50%);
   padding: 2em;
@@ -275,40 +301,55 @@ body {
   top: 50%;
 }
 .c2c-modal .modal-img {
-  max-width: 70px;
-  margin: auto;
+  max-width: 50px;
+  margin: auto auto 0.5em auto;
 }
-.c2c-modal button {
-  margin-top: 1em;
+.c2c-modal .body-item-2 {
+  font-size: 1.2em;
+  font-weight: bold;
 }
 .c2c-modal button:not(.close-modal) {
   border: 0;
-  border-radius: 10px;
+  border-radius: 50px;
   width: 100%;
-  font-size: 1.25rem;
   font-weight: bold;
 }
 .c2c-modal button.close-modal {
   border: 0;
   background: none;
-  font-size: 1.5rem;
+  font-size: 25px;
   position: absolute;
   top: 10px;
-  right: 10px;
+  right: 20px;
+  padding: 0;
+}
+.c2c-modal .body-content {
+  margin: 1em auto;
+}
+.c2c-modal .body-content .body-item-2 {
+  margin: 0.5em auto;
 }
 .c2c-widget {
   position: fixed;
-  bottom: 10px;
-  right: 10px;
+  bottom: 30px;
+  right: 30px;
   opacity: 0;
   visibility: hidden;
   transition: opacity 1s;
   cursor: pointer;
   z-index: 999;
 }
+.c2c-widget.widget--footer {
+  position: absolute;
+  z-index: 999;
+  height: 50px;
+}
 .open {
   visibility: visible !important;
   opacity: 1 !important;
+}
+#phone-widget-container {
+  position: relative;
 }
 .phone--widget .phone-button {
   width: 50px;
@@ -329,7 +370,7 @@ body {
   display: block;
 }
 .phone--widget .phone-button span img {
-  max-width: 70%;
+  max-width: 60%;
 }
 .phone--widget .phone-button::after,
 .phone--widget .phone-button::before {
@@ -357,22 +398,44 @@ body {
   animation-duration: inherit;
 }
 .c2c-widget .tooltip {
-  width: 200px;
+  min-width: 300px;
   border-radius: 10px;
   background: white;
-  padding: 0.5em;
+  padding: 1em;
   position: absolute;
-  top: -215px;
-  left: -170px;
+  top: calc((350px / 2 + 10px) * -1);
+  left: calc(310px * -1);
   visibility: hidden;
   opacity: 0;
   transition: opacity 1s;
+  text-align: center;
+  box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
 }
 .c2c-widget .tooltip button {
   border-radius: 50px;
   background: rgba(190, 69, 69, 0.6);
   border: none;
-  width: 75%;
+  max-width: 200px;
+  width: 100%;
   margin: auto;
   display: block;
+}
+.c2c-modal .tty-disclosure {
+  margin-top: 1.25em;
+  font-size: 0.85em;
+}
+
+@media screen and (max-width: 767px) {
+  .c2c-widget {
+    bottom: 10px;
+    right: 10px;
+  }
+}
+
+@media screen and (max-width: 500px) {
+  .c2c-widget .tooltip {
+    min-width: 200px;
+    top: calc((400px / 2 + 10px) * -1);
+    left: calc(200px * -1);
+  }
 }

@@ -5,13 +5,14 @@ const clickToCall = {
   modal: {
     templates: [
       {
-        container: `<div id="phone-modal" class="c2c-modal phone--modal modal--open">
+        container: `<div id="phone-modal" class="c2c-modal phone--modal">
                       <button role="button" class="close-modal">&times;</button>
                         <img class="modal-img" src="!!modalImg!!" alt="Click to Call icon"/>
                         <h1>!!heading!!</h1>
                         <div class="body-content">!!body!!</div>
                         <button role="button" style="background-color:!!themeColor!!;" id="click-to-call"><a href="tel:!!phoneNumber!!">!!buttonText!!</a>
                         </button>
+                        <p class="tty-disclosure">!!tty!!</p>
                     </div>`,
       },
     ],
@@ -34,12 +35,12 @@ const clickToCall = {
         const template = clickToCall.modal.templates[index];
         //save our processed HTML + combine
         clickToCall.processTemplateString(clickToCall.config.modal, template);
-        template.processedTemplate = template.container;
-
+        template.processedTemplate.html = template.processedTemplate.container;
+        delete template.processedTemplate.container;
         //create + append it
         const modalContainer = document.createElement("div");
         modalContainer.id = "modal-container"
-        modalContainer.innerHTML = template.processedTemplate;
+        modalContainer.innerHTML = template.processedTemplate.html;
         document.body.appendChild(modalContainer);
       },
       initModal() {
@@ -51,9 +52,8 @@ const clickToCall = {
           //accepts template index
           //builds the modal HTML
           this.buildTemplate(0);
-
-          const modal = document.querySelector("#phone-modal");
-          modal.querySelectorAll(".close-modal").forEach((btn, arr, i, modal) => {
+          clickToCall.modal.target = document.querySelector("#phone-modal");
+          clickToCall.modal.target.querySelectorAll(".close-modal").forEach((btn, arr, i, modal) => {
             btn.addEventListener("click", function (e) {
               //"this" gets bound to click event target
               //need to actually reference c2c object
@@ -73,26 +73,26 @@ const clickToCall = {
     templates: [
       {
         container: `<div id="phone-widget" class="c2c-widget phone--widget">
-                      <button id="widget-click-to-call" class="phone-button" role="button" style="background-color:!!themeColor!!;border-color:!!themeColor!!">
-                        <span id="phone-icon" class="icon">
-                          <img src='!!openIcon!!' alt='Click to Call icon'/>
-                        </span>
-                        <span id="close-icon" class="icon" style="display: none;">
-                          <img src='!!closeIcon!!' alt='Click to Call icon'/>
-                        </span>
-                      </button>
+          <button id="widget-click-to-call" class="phone-button" role="button" style="background-color:!!themeColor!!;border-color:!!themeColor!!">
+            <span id="phone-icon" class="icon">
+              <img src='!!openIcon!!' alt='Click to Call icon'/>
+            </span>
+            <span id="close-icon" class="icon" style="display: none;">
+              <img src='!!closeIcon!!' alt='Click to Call icon'/>
+            </span>
+          </button>
 
-                      !!tooltip!!
-                    </div>
-                 
-                `,
+          !!tooltip!!
+        </div>
+     
+    `,
         tooltip: `<div id="widget-tooltip" class="tooltip">
-                    <h5>!!heading!!</h5>
-                    <p>!!body!!</p>
-                    <button class="tooltip-button" role="button" style="background-color:!!themeColor!!;">
-                      <a href="tel:!!phoneNumber!!">!!buttonText!!</a>
-                    </button>
-                  </div>`,
+        <h5>!!heading!!</h5>
+        <p>!!body!!</p>
+        <button class="tooltip-button" role="button" style="background-color:!!themeColor!!;">
+          <a class="c2c-linkout" href="tel:!!phoneNumber!!" target="_parent">!!buttonText!!</a>
+        </button>
+      </div>`,
       },
     ],
     timeoutID: null,
@@ -101,19 +101,46 @@ const clickToCall = {
         const template = clickToCall.phoneWidget.templates[index];
         //save our processed HTML + combine
         clickToCall.processTemplateString(clickToCall.config.phoneWidget, template);
-        template.processedTemplate = template.container.replace("!!tooltip!!", template.tooltip);
-
+        template.processedTemplate.html = template.processedTemplate.container.replace("!!tooltip!!", template.processedTemplate.tooltip);
+        delete template.processedTemplate.container;
+        delete template.processedTemplate.tooltip;
         //create + append it
         const phoneWidgetContainer = document.createElement("div");
         phoneWidgetContainer.id = "phone-widget-container"
-        phoneWidgetContainer.innerHTML = template.processedTemplate;
-        document.body.appendChild(phoneWidgetContainer);
+        phoneWidgetContainer.innerHTML = template.processedTemplate.html;
+        clickToCall.config.anchorPoint.appendChild(phoneWidgetContainer);
+      },
+      changeWidgetStyling(entries, callback) {
+        entries.forEach((entry) => {
+          if (entry.intersectionRatio > 0) {
+
+            clickToCall.phoneWidget.target.classList.add('widget--footer');
+            clickToCall.footerSizeHandler();
+
+          } else {
+            clickToCall.phoneWidget.target.classList.remove('widget--footer');
+            clickToCall.phoneWidget.target.style.top = ""
+          }
+        });
+
+      },
+      createWidgetIntersectionObserver() {
+        let options = {
+          rootMargin: "0px",
+          threshold: 0,
+        };
+
+        let observer = new IntersectionObserver(this.changeWidgetStyling, options);
+        const target = document.querySelector("footer");
+        observer.observe(target);
+        clickToCall.phoneWidget.intersectionObserver = observer;
       },
       initPhoneWidget() {
         //accepts template index
         //builds the modal HTML
         this.buildTemplate(0);
-        const phoneWidget = document.querySelector("#phone-widget");
+        clickToCall.phoneWidget.target = document.querySelector("#phone-widget");
+        const phoneWidget = clickToCall.phoneWidget.target;
         const phoneWidgetButton = phoneWidget.querySelector("button");
         const phoneWidgetIcons = phoneWidgetButton.querySelectorAll(".icon");
         const phoneWidgetTooltipButton = document.querySelector("#widget-tooltip").querySelector("button");
@@ -132,6 +159,7 @@ const clickToCall = {
             //need to actually reference c2c object
             clickToCall.phoneWidget.methods.openPhoneWidget();
           });
+        this.createWidgetIntersectionObserver();
       },
       openPhoneWidget(clicked) {
         const widgetTooltip = document.querySelector("#widget-tooltip");
@@ -145,7 +173,7 @@ const clickToCall = {
           document.querySelector("#close-icon").style.display = "none";
           widgetTooltip.classList.remove("open");
           this.beginWidgetAnimationInterval(
-            document.querySelector("#phone-widget")
+            clickToCall.phoneWidget.target
           );
         }
       },
@@ -205,14 +233,9 @@ const clickToCall = {
             templateConfigObj[prop] = str;
           });
         } //replace the placeholder text w/ corresponding values from configs
-        target = target.replaceAll(`!!${prop}!!`, templateConfigObj[prop])
+        target = target.replaceAll(`!!${prop}!!`, templateConfigObj[prop]);
 
       }
-      //these values occur more than once, so let's run a one-time replaceAll for each top-level object in the template
-      target = target.replaceAll("!!phoneNumber!!", `+1${clickToCall.config.phoneNumber}`)
-      target = target.replaceAll("!!parsedPhoneNumber!!", `${this.formatPhoneNumber(clickToCall.config.phoneNumber)}`)
-      target = target.replaceAll("!!themeColor!!", `${clickToCall.config.themeColor}`)
-      templateObj[templateObjKey] = target;
     })
   },
   formatPhoneNumber(phoneNumberString) {
@@ -231,32 +254,115 @@ const clickToCall = {
     config.widgetCssAnimationTiming = config?.widgetCssAnimationTiming || 1.5;
     config.themeColor = config?.themeColor;
 
-    //if we don't have a user provided phone number, go get one 
-    if (!config?.phoneNumber) {
-      //conditional API call
-      const getPhoneNumber = fetch("https://catfact.ninja/fact").then((resp) => {
-        return resp.json();
-      });
 
-      getPhoneNumber.then((data) => {
-        config.phoneNumber = data;
-        console.log(data);
-        //expose config
-        this.config = config;
-        //initialize
-        this.modal.methods.initModal();
-        console.log(`Click to Call JS initialized.`);
-      });
+    //maps 
+    const modalTemplateConfigMap = new Map();
+    //set defaults
+    modalTemplateConfigMap.set("modalImg", "https://djk97zng6lbya.cloudfront.net/2023/08/02/15/59/28/092cc561-68a7-4473-90b1-252c139fd559.png");
+    modalTemplateConfigMap.set("heading", 'Liscensed Agents Standing By!');
+    modalTemplateConfigMap.set("body", ['We found a licensed insurance agent to walk you through your options shortly.', 'Click "CALL" to be connected.']);
+    modalTemplateConfigMap.set("buttonText", 'Call: !!parsedPhoneNumber!!');
+    modalTemplateConfigMap.set("tty", 'Available Mon-Fri, 8am to 5pm EST (TTY:711)');
 
+
+    const phoneWidgetTemplateConfigMap = new Map();
+
+    phoneWidgetTemplateConfigMap.set("openIcon", "https://djk97zng6lbya.cloudfront.net/2023/08/02/14/14/50/19395e4c-0204-4613-bca7-3ddae8afa892.png");
+    phoneWidgetTemplateConfigMap.set("closeIcon", "https://djk97zng6lbya.cloudfront.net/2023/08/02/14/14/42/58d25837-f7bb-474f-9f68-5cb2115f0f7d.png");
+    phoneWidgetTemplateConfigMap.set("heading", "LICENSED AGENT STANDING BY");
+    phoneWidgetTemplateConfigMap.set("body", "Get a free, no-obligation quote. Call Now!");
+    phoneWidgetTemplateConfigMap.set("buttonText", "Call: !!parsedPhoneNumber!!");
+
+
+    const templateConfigs = this.checkTemplateConfigs(config);
+
+    //check for modal templating configs
+    if (!templateConfigs.modal) {
+      //if empty let's populate w/ defaults from our map
+      config.modal = {};
+      modalTemplateConfigMap.forEach((value, key) => {
+        config.modal[key] = value;
+      })
     } else {
-      //expose config
-      this.config = config;
-      //initialize
-      this.modal.methods.initModal();
-      console.log(`Click to Call JS initialized.`);
+      //check if any keys in config are undefined
+      modalTemplateConfigMap.forEach((value, key) => {
+        if (!config.modal[key]) config.modal[key] = value;
+      })
     }
+    //check for wdiget templating configs
+    if (!templateConfigs.phoneWidget) {
+      //if empty let's populate w/ defaults from our map
+      config.phoneWidget = {};
+      phoneWidgetTemplateConfigMap.forEach((value, key) => {
+        config.phoneWidget[key] = value;
+      })
+    } else {
+      //we have some configs set
+      //check if any keys in config are undefined
+      phoneWidgetTemplateConfigMap.forEach((value, key) => {
+        //if undefined, populate with defaults and keep the defined ones from the user
+        if (!config.phoneWidget[key]) config.phoneWidget[key] = value;
+      })
+    }
+
+    //if we don't have a user provided phone number, we can assume we need to go get one 
+    if (!config?.phoneNumber) {
+      const getDefaultNumber = () => {
+        //find anchor tags and filter to get the default phone num
+        const anchorTags = document.querySelectorAll("a[href]");
+        for (const anchor of [...anchorTags]) {
+          const anchorHref = anchor.getAttribute("href");
+          if (anchorHref.includes("tel")) {
+            const phoneNum = anchorHref.split(":")[1].replace("+1", "");
+            return phoneNum;
+          }
+        }
+      }
+
+      //phone API fetch
+      const getPhoneNumber = async () => fetch("").then((resp) => {
+        return resp.json();
+      }).then((data) => {
+        config.phoneNumber = data;
+      }).catch((error) => {
+        console.log(error);
+        //default if fetch fails
+        config.phoneNumber = getDefaultNumber();
+      });
+    }
+    //check if null , if yes reset to document body
+    if (!config?.anchorPoint) {
+      const regionMainExists = document.querySelector(".regionMain");
+      if (regionMainExists) {
+        config.anchorPoint = regionMainExists;
+      }
+      else {
+        config.anchorPoint = document.body;
+      }
+    }
+    //expose config
+    this.config = config;
+
+    //if we havent closed the modal yet, preload widget images
+    if (!sessionStorage.getItem("modal-closed")) {
+      clickToCall.preloadElement(config.phoneWidget.openIcon);
+      clickToCall.preloadElement(config.phoneWidget.closeIcon);
+    }
+
+    //initialize
+    this.modal.methods.initModal();
+    console.log(`Click to Call JS initialized.`);
   },
+  preloadElement(link) {
+    const docLink = document.createElement("link");
+    docLink.rel = "preload";
+    docLink.href = link;
+    docLink.as = "image"
+    document.head.appendChild(docLink);
+  }
 };
+
+
 
 
 window.clickToCall = clickToCall || {};
