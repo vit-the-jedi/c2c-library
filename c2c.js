@@ -16,6 +16,26 @@ const clickToCall = {
             <p class="tty-disclosure">!!tty!!</p>
         </div>`,
       },
+      {
+        container: `<div id="phone-modal" class="c2c-modal phone--modal template-2">
+            <button role="button" class="close-modal">&times;</button>
+            <div class="top-content" style="background-color:!!themeColor!!">
+                <div class="image-container">
+                    <img src="!!modalImg!!" alt="Call center employee pointing"/>
+                </div>
+                <div class="text-container">
+                    <h1>!!heading!!</h1>
+                    <a href="!!phoneNumber!!">!!parsedPhoneNumber!!</a>
+                    <div class="body-content">!!body!!</div>
+                </div>
+                </divc>
+            </div>
+            <div class="bottom-content">
+                <button style="background-color:!!accentColor!!">!!buttonText!!</button>
+                <p class="tty-disclosure">!!tty!!</p>
+            </div>
+        </div>`
+      }
     ],
     methods: {
       closeModal(evTarget) {
@@ -55,7 +75,7 @@ const clickToCall = {
           document.body.appendChild(modalBg);
           //accepts template index
           //builds the modal HTML
-          this.buildTemplate(0);
+          this.buildTemplate(clickToCall.config.modal.template);
           clickToCall.modal.target = document.querySelector("#phone-modal");
           clickToCall.modal.target.querySelectorAll(".close-modal").forEach((btn, arr, i, modal) => {
             btn.addEventListener("click", function (e) {
@@ -142,7 +162,7 @@ const clickToCall = {
       initPhoneWidget() {
         //accepts template index
         //builds the modal HTML
-        this.buildTemplate(0);
+        this.buildTemplate(clickToCall.config.phoneWidget.template);
         clickToCall.phoneWidget.target = document.querySelector("#phone-widget");
         const phoneWidget = clickToCall.phoneWidget.target;
         const phoneWidgetButton = phoneWidget.querySelector("button");
@@ -248,6 +268,7 @@ const clickToCall = {
         str = str.replaceAll("!!phoneNumber!!", `+1${clickToCall.config.phoneNumber}`);
         str = str.replaceAll("!!parsedPhoneNumber!!", `${this.formatPhoneNumber(clickToCall.config.phoneNumber)}`)
         str = str.replaceAll("!!themeColor!!", `${clickToCall.config?.themeColor || 'red'}`);
+        str = str.replaceAll("!!accentColor!!", `${clickToCall.config?.accentColor || 'red'}`);
         templateObj.processedTemplate[key] = str;
       }
     })
@@ -275,6 +296,7 @@ const clickToCall = {
     if (config.phoneWidget) {
       definedConfigs.phoneWidget = Object.keys(config.phoneWidget).filter((key) => typeof config.phoneWidget[key] !== null);
     }
+
     return definedConfigs;
   },
   async init(config) {
@@ -294,6 +316,7 @@ const clickToCall = {
     modalTemplateConfigMap.set("body", ['We found a licensed insurance agent to walk you through your options shortly.', 'Click "CALL" to be connected.']);
     modalTemplateConfigMap.set("buttonText", 'Call: !!parsedPhoneNumber!!');
     modalTemplateConfigMap.set("tty", 'Available Mon-Fri, 8am to 5pm EST (TTY:711)');
+    modalTemplateConfigMap.set("template", 0);
 
 
     const phoneWidgetTemplateConfigMap = new Map();
@@ -303,6 +326,7 @@ const clickToCall = {
     phoneWidgetTemplateConfigMap.set("heading", "LICENSED AGENT STANDING BY");
     phoneWidgetTemplateConfigMap.set("body", "Get a free, no-obligation quote. Call Now!");
     phoneWidgetTemplateConfigMap.set("buttonText", "Call: !!parsedPhoneNumber!!");
+    phoneWidgetTemplateConfigMap.set("template", 0);
 
 
     const templateConfigs = this.checkTemplateConfigs(config);
