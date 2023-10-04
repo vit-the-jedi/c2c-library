@@ -25,7 +25,7 @@ const clickToCall = {
                 </div>
                 <div class="text-container">
                     <h1>!!heading!!</h1>
-                    <a href="!!phoneNumber!!">!!parsedPhoneNumber!!</a>
+                    <a href="!!phoneNumber!!" style="color: !!accentColor!!;">!!parsedPhoneNumber!!</a>
                     <div class="body-content">!!body!!</div>
                 </div>
                 </divc>
