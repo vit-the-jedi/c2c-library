@@ -2,6 +2,7 @@
 <!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
 <!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
 <!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]>      <html class="no-js"> <!--<![endif]-->
 <html>
 
 <head>
@@ -10,14 +11,9 @@
     <title></title>
     <meta name="description" content="">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css">
-    <link rel="stylesheet" href="c2c.css">
+    <link rel="stylesheet" href="../c2c.css">
 
     <style>
-        .regionMain {
-            height: 100vh;
-        }
-
         .c2c-modal .body-item-2 {
             font-size: 1.2em;
             font-weight: bold;
@@ -33,26 +29,17 @@
     <div class="regionMain">
         <a href="tel:+12036313892"></a>
     </div>
-    <footer>
-        <p>Hello</p>
-    </footer>
-    <script src="c2c.js"></script>
+    <script src="./c2c-web-component.js"></script>
     <script>
-        //all we have to do to get started is pass the init method an object with the modal html id, the phone widget id, and the phone widget tooltip id
-        const clickToCallConfig = clickToCall.init({
-            //do not pass country code and do not format phone number 
+        c2cInit({//do not pass country code and do not format phone number 
             //pass as 10-digit string
             //+1 (866) 511-7916
             phoneNumber: '8665117916',
             //pass a color to match branding, if nothing is passed, defaults to red
-            themeColor: '#3C529A',
-            accentColor: '#FD8A24',
-            modal: {
-                template: 1,
-                modalImg: `images/AdobeStock_538973264.png`,
-            }
+            themeColor: '#EB034C',
         });
     </script>
 </body>
+<footer></footer>
 
 </html>
