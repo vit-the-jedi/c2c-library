@@ -520,7 +520,15 @@
     flex-wrap: wrap;
     justify-content: center;
   }
+  .c2c-modal.template-2 .top-content .text-container {
+    flex-basis: 100%;
+    padding: 0 1em;
+  }
   .c2c-modal.template-2 .top-content .image-container {
     order: 2;
+    flex-basis: 100%;
+  }
+  .c2c-modal.template-2 .image-container img {
+    max-width: 150px;
   }
 }
