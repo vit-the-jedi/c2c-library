@@ -496,7 +496,7 @@ const clickToCall = {
     let shouldSubmit = true;
 
     switch (eventType) {
-      case "init":
+      case "c2c-init":
       default:
         const hello = JSON.parse(sessionStorage.getItem("c2c-init-event-sent"));
         if (JSON.parse(sessionStorage.getItem("c2c-init-event-sent"))) {
