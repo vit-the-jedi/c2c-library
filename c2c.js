@@ -2,6 +2,7 @@
 
 const clickToCall = {
   config: null,
+  stats: {},
   modal: {
     templates: [
       {
@@ -11,10 +12,11 @@ const clickToCall = {
             <h1>!!heading!!</h1>
             <div class="body-content">!!body!!</div>
             <button role="button" style="background-color:!!themeColor!!;" id="click-to-call">
-            <a class="c2c-linkout" href="tel:!!phoneNumber!!" target="_parent">!!buttonText!!</a>
+            <a class="c2c-linkout" id="modal-button" href="tel:!!phoneNumber!!" target="_parent">!!buttonText!!</a>
             </button>
             <p class="tty-disclosure">!!tty!!</p>
         </div>`,
+        'description': 'Phone icon stacked on top of headline, body text, and button.'
       },
       {
         container: `<div id="phone-modal" class="c2c-modal phone--modal template-2">
@@ -25,16 +27,17 @@ const clickToCall = {
                 </div>
                 <div class="text-container">
                     <h1>!!heading!!</h1>
-                    <a href="!!phoneNumber!!" style="color: !!accentColor!!;">!!parsedPhoneNumber!!</a>
+                    <a href="tel:!!phoneNumber!!" id="modal-phone-number" style="color: !!accentColor!!;">!!parsedPhoneNumber!!</a>
                     <div class="body-content">!!body!!</div>
                 </div>
                 </divc>
             </div>
             <div class="bottom-content">
-                <button style="background-color:!!accentColor!!">!!buttonText!!</button>
+                <a href="tel:!!phoneNumber!!" class="c2c-linkout" id="modal-button" style="background-color:!!accentColor!!">!!buttonText!!</a>
                 <p class="tty-disclosure">!!tty!!</p>
             </div>
-        </div>`
+        </div>`,
+        'description': "Image of call center employee on left hand side, with text and phone number on the right hand side. CTA button stacked below on new row."
       }
     ],
     methods: {
@@ -43,6 +46,10 @@ const clickToCall = {
         document.body.removeChild(clickToCall.modal.modalBg);
         this.saveModalClosedState();
         clickToCall.phoneWidget.methods.initPhoneWidget();
+        const modalOpenTimeElapsed = Date.now() - clickToCall.stats.modalOpenTimestamp;
+        clickToCall.stats.timeToModalClose = modalOpenTimeElapsed;
+        clickToCall.stats.timeToModalCloseSeconds = `${(modalOpenTimeElapsed / 1000).toFixed(2)}s`;
+        //clickToCall.sendToAnalytics("modalClosed");
       },
       getModalClosedState() {
         return JSON.parse(sessionStorage.getItem("c2c-modal-closed")) === true
@@ -86,7 +93,8 @@ const clickToCall = {
               );
             });
           });
-
+          clickToCall.stats.modalOpenTimestamp = Date.now();
+          clickToCall.stats.modalOpenTimestampDate = new Date(Date.now()).toString();
         } else {
           clickToCall.phoneWidget.methods.initPhoneWidget();
         }
@@ -114,7 +122,7 @@ const clickToCall = {
         <h5>!!heading!!</h5>
         <p>!!body!!</p>
         <button class="tooltip-button" role="button" style="background-color:!!themeColor!!;">
-          <a class="c2c-linkout" href="tel:!!phoneNumber!!" target="_parent">!!buttonText!!</a>
+          <a class="c2c-linkout" id="widget-button" href="tel:!!phoneNumber!!" target="_parent">!!buttonText!!</a>
         </button>
       </div>`,
       },
@@ -184,6 +192,7 @@ const clickToCall = {
             clickToCall.phoneWidget.methods.openPhoneWidget();
           });
         this.createWidgetIntersectionObserver();
+        clickToCall.stats.widgetCreatedTimestamp = Date.now();
       },
       openPhoneWidget(clicked) {
         const widgetTooltip = document.querySelector("#widget-tooltip");
@@ -192,6 +201,12 @@ const clickToCall = {
           document.querySelector("#phone-icon").style.display = "none";
           document.querySelector("#close-icon").style.display = "block";
           this.stopWidgetAnimationInterval(this.animationRunning);
+          if (!clickToCall.stats.timeToWidgetOpen) {
+            const timeToWidgetOpen = Date.now() - clickToCall.stats.widgetCreatedTimestamp;
+            clickToCall.stats.timeToWidgetOpen = timeToWidgetOpen;
+            clickToCall.stats.timeToWidgetOpenSeconds = `${(timeToWidgetOpen / 1000)}s`;
+            //clickToCall.sendToAnalytics("phoneWidgetOpened");
+          }
         } else {
           document.querySelector("#phone-icon").style.display = "block";
           document.querySelector("#close-icon").style.display = "none";
@@ -296,10 +311,12 @@ const clickToCall = {
     if (config.phoneWidget) {
       definedConfigs.phoneWidget = Object.keys(config.phoneWidget).filter((key) => typeof config.phoneWidget[key] !== null);
     }
-
+    //returns only the key/value pairs that the user has defined
+    //we use this to populate the missing key/value pairs with defaults
     return definedConfigs;
   },
   async init(config) {
+    this.stats.initStart = performance.now();
     //may need to check config for validity
     //optinal values
     config.widgetAnimationIntervalTiming =
@@ -328,7 +345,6 @@ const clickToCall = {
     phoneWidgetTemplateConfigMap.set("buttonText", "Call: !!parsedPhoneNumber!!");
     phoneWidgetTemplateConfigMap.set("template", 0);
 
-
     const templateConfigs = this.checkTemplateConfigs(config);
 
     //check for modal templating configs
@@ -344,6 +360,10 @@ const clickToCall = {
         if (!config.modal[key]) config.modal[key] = value;
       })
     }
+    //set description for template 
+    config.modal.templateDescription = clickToCall.modal.templates[config.modal.template].description
+
+
     //check for wdiget templating configs
     if (!templateConfigs.phoneWidget) {
       //if empty let's populate w/ defaults from our map
@@ -373,6 +393,8 @@ const clickToCall = {
           }
         }
       }
+
+
 
       //phone API fetch
       const getPhoneNumber = async () => fetch("").then((resp) => {
@@ -424,6 +446,10 @@ const clickToCall = {
       clickToCall.footerSizeHandler();
     });
     console.log(`Click to Call JS initialized.`);
+    this.stats.initEnd = performance.now();
+    this.stats.timeToInit = (this.stats.initEnd - this.stats.initStart) / 1000;
+    this.stats.timeToInitSeconds = this.stats.timeToInit < 1 ? `<${Math.ceil(this.stats.timeToInit)}s` : `${Math.ceil(this.stats.timeToInit)}s`;
+    this.sendToAnalytics("c2c-init");
   },
   preloadElement(link) {
     const docLink = document.createElement("link");
@@ -438,7 +464,6 @@ const clickToCall = {
       const footerHeight = footer.getBoundingClientRect().height;
       const widgetStyles = window.getComputedStyle(clickToCall.phoneWidget.target);
       const widgetHeight = clickToCall.phoneWidget.target.getBoundingClientRect().height;
-      console.log(widgetStyles.getPropertyValue("right"));
       clickToCall.phoneWidget.target.style.top = (footerHeight * -1) - widgetHeight - parseFloat(widgetStyles.getPropertyValue("right"), 10) + "px";
     }
   },
@@ -450,8 +475,10 @@ const clickToCall = {
         modal: this.modalConfigs(),
         phoneWidget: this.widgetConfigs(),
       }
+      cleanConfigs.phoneNumber = clickToCall.config.phoneNumber;
       return cleanConfigs;
     },
+
     modalConfigs() {
       return clickToCall.config.modal;
     },
@@ -459,6 +486,46 @@ const clickToCall = {
       return clickToCall.config.phoneWidget;
     }
   },
+  sendToAnalytics(eventType) {
+    window.dataLayer = window.dataLayer || [];
+    const data = {
+      event: eventType,
+      stats: {},
+    }
+
+    let shouldSubmit = true;
+
+    switch (eventType) {
+      case "init":
+      default:
+        const hello = JSON.parse(sessionStorage.getItem("c2c-init-event-sent"));
+        if (JSON.parse(sessionStorage.getItem("c2c-init-event-sent"))) {
+          shouldSubmit = false;
+          return;
+        }
+        data.config = this.getters.getConfigs();
+        data.stats.timeToInit = this.stats.timeToInitSeconds;
+        data.stats.modalOpenTimestamp = this.stats?.modalOpenTimestamp;
+        data.stats.modalOpenTimestampDate = this.stats?.modalOpenTimestampDate;
+        data.stats.widgetCreatedTimestamp = this.stats?.widgetCreatedTimestamp;
+        sessionStorage.setItem("c2c-init-event-sent", true);
+        break;
+      case "modalClosed":
+        data.stats.timeToModalClose = this.stats.timeToModalClose;
+        data.stats.timeToModalCloseSeconds = this.stats.timeToModalCloseSeconds;
+        break;
+      case "phoneWidgetCreated":
+        data.stats.widgetCreatedTimestamp = this.stats.widgetCreatedTimestamp;
+        break;
+      case "phoneWidgetOpened":
+        data.stats.timeToWidgetOpen = this.stats.timeToWidgetOpen;
+        data.stats.timeToWidgetOpenSeconds = this.stats.timeToWidgetOpenSeconds;
+    }
+    if (shouldSubmit) {
+      dataLayer.push(data);
+    }
+
+  }
 };
 
 

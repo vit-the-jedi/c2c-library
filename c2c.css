@@ -501,16 +501,24 @@
   filter: invert(38%) sepia(83%) saturate(2323%) hue-rotate(343deg)
     brightness(101%) contrast(98%);
 }
+.c2c-modal.template-2 .body-content {
+  font-size: 1.25em;
+}
 .c2c-modal.template-2 .bottom-content {
   padding: 1em;
   color: #fff;
 }
-.c2c-modal.template-2 .bottom-content button {
+.c2c-modal.template-2 .bottom-content a {
   max-width: 350px;
   width: 100%;
   padding: 1em !important;
   color: inherit;
   border-radius: 0;
+  font-size: 1.25em;
+  text-decoration: none;
+  font-weight: bold;
+  display: block;
+  margin: auto;
 }
 .c2c-modal.template-2 .bottom-content .tty-disclosure {
   color: black;
