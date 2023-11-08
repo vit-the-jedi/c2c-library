@@ -341,7 +341,8 @@ const clickToCall = {
     const h1El = document.querySelector("h1");
     if (h1El) {
       const h1Styles = getComputedStyle(h1El);
-      const h1FontFamily = h1Styles.getPropertyValue("font-family");
+      let h1FontFamily = h1Styles.getPropertyValue("font-family");
+      h1FontFamily = h1FontFamily.replaceAll('"', "");
       return h1FontFamily;
     } else {
       return null;
