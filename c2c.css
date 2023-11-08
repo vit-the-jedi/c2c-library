@@ -260,6 +260,7 @@
 .c2c-widget button,
 .c2c-modal button {
   padding: 0 !important;
+  min-height: 50px;
 }
 .c2c-linkout {
   padding: 0.5em 0;
@@ -531,4 +532,21 @@
   .c2c-modal.template-2 .image-container img {
     max-width: 150px;
   }
+}
+
+.c2c-modal.template-3 .c2c-linkout {
+  padding: 1em;
+  margin-left: 2.5%;
+}
+.c2c-modal.template-3 #click-to-call {
+  font-size: 2rem;
+}
+.c2c-modal.template-3 #click-to-call::before {
+  content: "";
+  width:20px;
+  height:20px;
+  position: absolute;
+  left: 18%;
+  margin-top: 6.75%;
+  background: url("https://djk97zng6lbya.cloudfront.net/2023/08/02/14/14/50/19395e4c-0204-4613-bca7-3ddae8afa892.png") no-repeat center center / contain;
 }
