@@ -37,7 +37,7 @@ const clickToCall = {
         </div>`,
       },
       {
-        container: ` <div id="phone-modal" style="font-family: !!bodyFont!!" class="c2c-modal phone--modal">
+        container: ` <div id="phone-modal" style="font-family: !!bodyFont!!" class="c2c-modal template-3 phone--modal">
               <button role="button" class="close-modal">&times;</button>
               <h1 style="color: !!accentColor!!; font-family: !!headingFont!!">!!heading!!</h1>
               <div class="body-content" style="font-family: !!bodyFont!!">!!body!!</div>
