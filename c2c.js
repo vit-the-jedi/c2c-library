@@ -37,7 +37,7 @@ const clickToCall = {
         </div>`,
       },
       {
-        container: ` <div id="phone-modal" class="c2c-modal phone--modal"><button role="button" class="close-modal">&times;</button><h1 style="color: !!accentColor!!";>!!heading!!</h1><div class="body-content">!!body!!</div><button role="button" style="background-color:!!themeColor!!;" id="click-to-call"><a class="c2c-linkout" href="tel:!!phoneNumber!!" target="_parent">!!buttonText!!</a></button><p class="tty-disclosure">!!tty!!</p></div>`,
+        container: ` <div id="phone-modal" class="c2c-modal phone--modal"><button role="button" class="close-modal">&times;</button><h1 style="color: !!accentColor!!; font-family: !!h1FontFamily!!">!!heading!!</h1><div class="body-content">!!body!!</div><button role="button" style="background-color:!!themeColor!!;" id="click-to-call"><a class="c2c-linkout" href="tel:!!phoneNumber!!" target="_parent">!!buttonText!!</a></button><p class="tty-disclosure">!!tty!!</p></div>`,
       },
     ],
     methods: {
@@ -299,6 +299,10 @@ const clickToCall = {
           "!!accentColor!!",
           `${clickToCall.config?.accentColor || "red"}`
         );
+        str = str.replaceAll(
+          "!!h1FontFamily!!",
+          clickToCall.getHeaderFontFamily() ?? "inherit"
+        );
         templateObj.processedTemplate[key] = str;
       }
     });
@@ -332,6 +336,16 @@ const clickToCall = {
     }
 
     return definedConfigs;
+  },
+  getHeaderFontFamily() {
+    const h1El = document.querySelector("h1");
+    if (h1El) {
+      const h1Styles = getComputedStyle(h1El);
+      const h1FontFamily = h1Styles.getPropertyValue("font-family");
+      return h1FontFamily;
+    } else {
+      return null;
+    }
   },
   async init(config) {
     //may need to check config for validity
