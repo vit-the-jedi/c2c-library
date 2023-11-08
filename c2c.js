@@ -5,19 +5,19 @@ const clickToCall = {
   modal: {
     templates: [
       {
-        container: `<div id="phone-modal" class="c2c-modal phone--modal">
-          <button role="button" class="close-modal">&times;</button>
+        container: `<div id="phone-modal" font-family: !!bodyFont!!" class="c2c-modal phone--modal">
+          <button role="button" font-family: !!bodyFont!!" class="close-modal">&times;</button>
             <img class="modal-img" src="!!modalImg!!" alt="Click to Call icon"/>
-            <h1>!!heading!!</h1>
+            <h1 font-family: !!headingFont!!">!!heading!!</h1>
             <div class="body-content">!!body!!</div>
-            <button role="button" style="background-color:!!themeColor!!;" id="click-to-call">
+            <button role="button" style="background-color:!!themeColor!!;font-family: !!buttonFont!!" id="click-to-call">
             <a class="c2c-linkout" href="tel:!!phoneNumber!!" target="_parent">!!buttonText!!</a>
             </button>
             <p class="tty-disclosure">!!tty!!</p>
         </div>`,
       },
       {
-        container: `<div id="phone-modal" class="c2c-modal phone--modal template-2">
+        container: `<div id="phone-modal" font-family: !!bodyFont!!" class="c2c-modal phone--modal template-2">
             <button role="button" class="close-modal">&times;</button>
             <div class="top-content" style="background-color:!!themeColor!!">
                 <div class="image-container">
@@ -37,7 +37,15 @@ const clickToCall = {
         </div>`,
       },
       {
-        container: ` <div id="phone-modal" class="c2c-modal phone--modal"><button role="button" class="close-modal">&times;</button><h1 style="color: !!accentColor!!; font-family: !!h1FontFamily!!">!!heading!!</h1><div class="body-content">!!body!!</div><button role="button" style="background-color:!!themeColor!!;" id="click-to-call"><a class="c2c-linkout" href="tel:!!phoneNumber!!" target="_parent">!!buttonText!!</a></button><p class="tty-disclosure">!!tty!!</p></div>`,
+        container: ` <div id="phone-modal" style="font-family: !!bodyFont!!" class="c2c-modal phone--modal">
+              <button role="button" class="close-modal">&times;</button>
+              <h1 style="color: !!accentColor!!; font-family: !!headingFont!!">!!heading!!</h1>
+              <div class="body-content" style="font-family: !!bodyFont!!">!!body!!</div>
+                <button role="button" style="background-color:!!themeColor!!; font-family: !!buttonFont!!" id="click-to-call">
+                  <a class="c2c-linkout" href="tel:!!phoneNumber!!" target="_parent">!!buttonText!!</a>
+                </button>
+                <p class="tty-disclosure">!!tty!!</p>
+            </div>`,
       },
     ],
     methods: {
@@ -105,8 +113,8 @@ const clickToCall = {
   phoneWidget: {
     templates: [
       {
-        container: `<div id="phone-widget" class="c2c-widget phone--widget">
-          <button id="widget-click-to-call" class="phone-button" role="button" style="background-color:!!themeColor!!;border-color:!!themeColor!!">
+        container: `<div id="phone-widget" style="font-family: !!bodyFont!!" class="c2c-widget phone--widget">
+          <button id="widget-click-to-call" class="phone-button"  role="button" style="background-color:!!themeColor!!;border-color:!!themeColor!!;font-family: !!buttonFont!!">
             <span id="phone-icon" class="icon">
               <img src='!!openIcon!!' alt='Click to Call icon'/>
             </span>
@@ -119,10 +127,10 @@ const clickToCall = {
         </div>
      
     `,
-        tooltip: `<div id="widget-tooltip" class="tooltip">
+        tooltip: `<div id="widget-tooltip" style="font-family: !!bodyFont!!" class="tooltip">
         <h5>!!heading!!</h5>
         <p>!!body!!</p>
-        <button class="tooltip-button" role="button" style="background-color:!!themeColor!!;">
+        <button class="tooltip-button" role="button" style="background-color:!!themeColor!!; font-family: !!bodyFont!!">
           <a class="c2c-linkout" href="tel:!!phoneNumber!!" target="_parent">!!buttonText!!</a>
         </button>
       </div>`,
@@ -300,8 +308,16 @@ const clickToCall = {
           `${clickToCall.config?.accentColor || "red"}`
         );
         str = str.replaceAll(
-          "!!h1FontFamily!!",
-          clickToCall.getHeaderFontFamily() ?? "inherit"
+          "!!headingFont!!",
+          clickToCall.config?.headingFont ?? "inherit"
+        );
+        str = str.replaceAll(
+          "!!bodyFont!!",
+          clickToCall.config?.bodyFont ?? "inherit"
+        );
+        str = str.replaceAll(
+          "!!buttonFont!!",
+          clickToCall.config?.buttonFont ?? "inherit"
         );
         templateObj.processedTemplate[key] = str;
       }
@@ -336,17 +352,6 @@ const clickToCall = {
     }
 
     return definedConfigs;
-  },
-  getHeaderFontFamily() {
-    const h1El = document.querySelector("h1");
-    if (h1El) {
-      const h1Styles = getComputedStyle(h1El);
-      let h1FontFamily = h1Styles.getPropertyValue("font-family");
-      h1FontFamily = h1FontFamily.replaceAll('"', "");
-      return h1FontFamily;
-    } else {
-      return null;
-    }
   },
   async init(config) {
     //may need to check config for validity
